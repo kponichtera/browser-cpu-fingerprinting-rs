@@ -1,2 +1,4 @@
 bind_address: "127.0.0.1"
 port: 8080
+database_connection_count: 5
+database_url: "postgres://postgres:Browser123!@localhost"

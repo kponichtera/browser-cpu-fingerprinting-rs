@@ -11,6 +11,8 @@ const CONFIG_FILE_PATH_DEFAULT: &'static str = "config/api_server";
 pub struct ApiServerConfig {
     pub bind_address: String,
     pub port: u16,
+    pub database_connection_count: u32,
+    pub database_url: String
 }
 
 pub fn read_config(custom_file_path: Option<&Path>) -> ApiServerConfig {

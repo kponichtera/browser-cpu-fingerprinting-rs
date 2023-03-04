@@ -13,3 +13,4 @@ log = "0.4"
 env_logger = "0.10.0"
 config = "0.13"
 tempfile = "3.4.0"
+sqlx = { version = "0.6", features = [ "runtime-actix-rustls", "postgres" ] }
