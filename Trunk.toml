@@ -1,0 +1,11 @@
+# More in: https://github.com/thedodd/trunk/blob/master/Trunk.toml
+
+[build]
+target = "frontend/index.html"
+dist = "dist"
+
+[serve]
+port = 8000
+
+[[proxy]]
+backend = "http://localhost:8080/api"

@@ -3,8 +3,8 @@ use config::Config;
 use log::info;
 use serde::Deserialize;
 
-const CONFIG_ENV_PREFIX: &'static str = "API_SERVER";
-const CONFIG_FILE_PATH_DEFAULT: &'static str = "config/api_server";
+const CONFIG_ENV_PREFIX: &str = "API_SERVER";
+const CONFIG_FILE_PATH_DEFAULT: &str = "config/backend";
 
 #[allow(unused)]
 #[derive(Clone, Debug, Deserialize)]
@@ -44,7 +44,7 @@ pub fn read_config(custom_file_path: Option<&Path>) -> ApiServerConfig {
 #[cfg(test)]
 mod tests {
     use std::io::Write;
-    use crate::api_server::config::read_config;
+    use crate::config::read_config;
 
     #[test]
     fn development_config_parses() {

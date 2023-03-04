@@ -1,0 +1,6 @@
+version: 3
+
+tasks:
+  build: "trunk build --release"
+  run: "trunk serve"
+  clean: "trunk clean"

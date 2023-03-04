@@ -2,9 +2,17 @@ version: 3
 
 includes:
   dev: ./dev
+  backend: ./backend
+  frontend: ./frontend
 
 tasks:
-  check: "cargo check"
-  build: "cargo build --release"
-  clean: "cargo clean"
-  run_api_server: "cargo run --bin api_server"
+  test: "cargo test"
+  check: "cargo clippy"
+  build:
+    cmds:
+      - task: backend:build
+      - task: frontend:build
+  clean:
+    cmds:
+      - task: frontend:clean
+      - "cargo clean"

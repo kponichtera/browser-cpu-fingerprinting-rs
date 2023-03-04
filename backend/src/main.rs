@@ -1,3 +1,7 @@
+mod handlers;
+mod config;
+mod context;
+
 use std::error::Error;
 use actix_web::{App, HttpServer};
 use actix_web::middleware::Logger;
@@ -7,10 +11,6 @@ use log::info;
 use crate::config::read_config;
 use crate::context::build_context;
 use crate::handlers::register_handlers;
-
-mod handlers;
-mod config;
-mod context;
 
 #[actix_web::main]
 async fn main() -> Result<(), Box<dyn Error>> {

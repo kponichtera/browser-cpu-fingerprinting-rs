@@ -1,0 +1,5 @@
+version: 3
+
+tasks:
+  build: "cargo build --bin backend --release"
+  run: "cargo run --bin backend"
