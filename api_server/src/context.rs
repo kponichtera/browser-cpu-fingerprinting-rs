@@ -1,7 +1,7 @@
 use std::error::Error;
 use sqlx::{Pool, Postgres};
 use sqlx::postgres::PgPoolOptions;
-use crate::api_server::config::ApiServerConfig;
+use crate::config::ApiServerConfig;
 
 #[derive(Clone)]
 pub struct ApiServerContext {

@@ -4,10 +4,13 @@ use actix_web::middleware::Logger;
 use actix_web::web::Data;
 use env_logger::Env;
 use log::info;
+use crate::config::read_config;
+use crate::context::build_context;
+use crate::handlers::register_handlers;
 
-use browser_cpu_fingerprinting_rs::api_server::config::read_config;
-use browser_cpu_fingerprinting_rs::api_server::context::build_context;
-use browser_cpu_fingerprinting_rs::api_server::handlers::register_handlers;
+mod handlers;
+mod config;
+mod context;
 
 #[actix_web::main]
 async fn main() -> Result<(), Box<dyn Error>> {

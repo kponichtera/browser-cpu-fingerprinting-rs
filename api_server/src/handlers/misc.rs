@@ -1,6 +1,6 @@
 use actix_web::{HttpResponse, Responder, get};
 use actix_web::web::Data;
-use crate::api_server::context::ApiServerContext;
+use crate::context::ApiServerContext;
 
 #[get("/ping")]
 pub async fn ping(context: Data<ApiServerContext>) -> impl Responder {
