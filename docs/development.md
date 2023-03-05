@@ -9,7 +9,7 @@
 
 ## Running backend locally
 
-1. Start required Docker containers with `task dev:compose:run`
+1. Start required Docker containers with `task dev:compose:up`
 2. Build and run backend with `task backend:run`.
    API will be available on http://localhost:8080.
 
