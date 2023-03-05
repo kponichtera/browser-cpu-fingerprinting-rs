@@ -6,6 +6,8 @@
 * [Task](https://taskfile.dev/)
 * [Rust](https://www.rust-lang.org/) toolchain
   * [Trunk](https://trunkrs.dev/)
+  * The `wasm32-unknown-unknown` target has to be installed: Can be done using `rustup target add wasm32-unknown-unknown`
+
 
 ## Running backend locally
 
