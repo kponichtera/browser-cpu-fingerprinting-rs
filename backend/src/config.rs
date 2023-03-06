@@ -1,7 +1,7 @@
-use std::path::Path;
 use config::Config;
 use log::info;
 use serde::Deserialize;
+use std::path::Path;
 
 const CONFIG_ENV_PREFIX: &str = "API_SERVER";
 const CONFIG_FILE_PATH_DEFAULT: &str = "config/backend";
@@ -12,7 +12,7 @@ pub struct BackendConfig {
     pub bind_address: String,
     pub port: u16,
     pub database_connection_count: u32,
-    pub database_url: String
+    pub database_url: String,
 }
 
 pub fn read_config(custom_file_path: Option<&Path>) -> BackendConfig {
@@ -20,12 +20,16 @@ pub fn read_config(custom_file_path: Option<&Path>) -> BackendConfig {
 
     match custom_file_path {
         Some(custom_file_path) => {
-            info!("Using custom configuration path {}", custom_file_path.to_str().unwrap_or(""));
+            info!(
+                "Using custom configuration path {}",
+                custom_file_path.to_str().unwrap_or("")
+            );
             config_builder = config_builder.add_source(config::File::from(custom_file_path));
         }
         None => {
             info!("Using default configuration path");
-            config_builder = config_builder.add_source(config::File::with_name(CONFIG_FILE_PATH_DEFAULT));
+            config_builder =
+                config_builder.add_source(config::File::with_name(CONFIG_FILE_PATH_DEFAULT));
         }
     }
 
@@ -43,8 +47,8 @@ pub fn read_config(custom_file_path: Option<&Path>) -> BackendConfig {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Write;
     use crate::config::read_config;
+    use std::io::Write;
 
     #[test]
     fn development_config_parses() {
@@ -64,10 +68,7 @@ mod tests {
             port: "0.0.0.0"
         "#;
 
-        let mut config_file = tempfile::Builder::new()
-            .suffix(".yml")
-            .tempfile()
-            .unwrap();
+        let mut config_file = tempfile::Builder::new().suffix(".yml").tempfile().unwrap();
 
         config_file.write_all(config.as_ref()).unwrap();
 

@@ -8,6 +8,10 @@ includes:
 tasks:
   test: "cargo test"
   check: "cargo clippy"
+  fix:
+    cmds:
+     - "cargo clippy --fix --allow-dirty"
+     - "cargo fmt"
   build:
     cmds:
       - task: backend:build

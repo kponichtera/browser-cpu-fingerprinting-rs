@@ -1,11 +1,11 @@
-use std::error::Error;
-use sqlx::{Pool, Postgres};
-use sqlx::postgres::PgPoolOptions;
 use crate::config::BackendConfig;
+use sqlx::postgres::PgPoolOptions;
+use sqlx::{Pool, Postgres};
+use std::error::Error;
 
 #[derive(Clone)]
 pub struct BackendContext {
-    pub connection_pool: Pool<Postgres>
+    pub connection_pool: Pool<Postgres>,
 }
 
 pub async fn build_context(config: &BackendConfig) -> Result<BackendContext, Box<dyn Error>> {
@@ -14,11 +14,9 @@ pub async fn build_context(config: &BackendConfig) -> Result<BackendContext, Box
         .connect(config.database_url.as_str())
         .await?;
 
-    sqlx::migrate!()
-        .run(&pool)
-        .await?;
+    sqlx::migrate!().run(&pool).await?;
 
     Ok(BackendContext {
-        connection_pool: pool
+        connection_pool: pool,
     })
 }
