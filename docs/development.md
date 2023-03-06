@@ -16,12 +16,12 @@
    You can use the same command later to remove
    all the data from the database and start fresh.
 3. Build and run backend with `task backend:run`.
-   API will be available on http://localhost:8080.
+   API will be available on http://localhost:8000.
 
 ## Running frontend locally
 
 1. Build and run frontend with `task frontend:run`.
-   It will be served on http://localhost:8000.
+   It will be served on http://localhost:9000.
    Page will automatically refresh when there are changes in the code.
 
 ## Working with migrations

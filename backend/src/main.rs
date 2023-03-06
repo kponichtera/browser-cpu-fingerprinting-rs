@@ -1,9 +1,10 @@
 mod handlers;
 mod config;
 mod context;
+mod repository;
 
 use std::error::Error;
-use actix_web::{App, HttpServer};
+use actix_web::{App, HttpServer, middleware, web};
 use actix_web::middleware::Logger;
 use actix_web::web::Data;
 use env_logger::Env;
@@ -25,12 +26,22 @@ async fn main() -> Result<(), Box<dyn Error>> {
     HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
+            .wrap(middleware::Compress::default())
             .app_data(Data::new(context.clone()))
+            .configure(configure_server)
             .configure(register_handlers)
     })
         .bind(bind_addr)?
         .run()
         .await?;
 
-    return Ok(())
+    Ok(())
+}
+
+fn configure_server(cfg: &mut web::ServiceConfig) {
+    // Increase the size limit of the payload to 100 MB
+    let json_cfg = web::JsonConfig::default()
+        .limit(100 * 1024 * 1024);
+
+    cfg.app_data(json_cfg);
 }

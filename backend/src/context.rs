@@ -5,7 +5,7 @@ use crate::config::BackendConfig;
 
 #[derive(Clone)]
 pub struct BackendContext {
-    pub connection_pool: Pool<Postgres>,
+    pub connection_pool: Pool<Postgres>
 }
 
 pub async fn build_context(config: &BackendConfig) -> Result<BackendContext, Box<dyn Error>> {
@@ -19,7 +19,6 @@ pub async fn build_context(config: &BackendConfig) -> Result<BackendContext, Box
         .await?;
 
     Ok(BackendContext {
-        connection_pool: pool,
+        connection_pool: pool
     })
 }
-

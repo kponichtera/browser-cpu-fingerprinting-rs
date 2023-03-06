@@ -5,4 +5,6 @@ mod result;
 
 pub fn register_handlers(cfg: &mut web::ServiceConfig) {
     cfg.service(misc::ping);
+
+    cfg.service(result::upload);
 }

@@ -2,7 +2,7 @@ version: 3
 
 env:
   SQLX_OFFLINE: "true"
-  DATABASE_URL: "postgres://backend:password@localhost"
+  DATABASE_URL: "postgres://backend:password@localhost:15432"
 
 tasks:
   sqlx: "sqlx {{.CLI_ARGS}}"

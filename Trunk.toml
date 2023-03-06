@@ -5,7 +5,7 @@ target = "frontend/index.html"
 dist = "dist"
 
 [serve]
-port = 8000
+port = 9000
 
 [[proxy]]
-backend = "http://localhost:8080/api"
+backend = "http://localhost:8000/api"

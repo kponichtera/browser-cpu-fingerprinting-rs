@@ -1,3 +1,19 @@
 {
-  "db": "PostgreSQL"
+  "db": "PostgreSQL",
+  "674494177087007df7ec12c27624adcd5c97b98873a621e5d1cc6b288fb31cc6": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar",
+          "Jsonb",
+          "Jsonb",
+          "Jsonb"
+        ]
+      }
+    },
+    "query": "INSERT INTO upload_benchmarkresult (model, user_agent, benchmark_results, times, b64_charts)\n        VALUES ($1, $2, $3, $4, $5)\n        "
+  }
 }
