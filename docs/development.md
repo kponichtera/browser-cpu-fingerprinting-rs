@@ -11,7 +11,7 @@
 
 ## Running backend locally
 
-1. Start required Docker containers with `task dev:compose:run`
+1. Start required Docker containers with `task dev:compose:up`
 2. Setup local development database with `task backend:migrations:reset`.
    You can use the same command later to remove
    all the data from the database and start fresh.
