@@ -1,5 +1,9 @@
 version: 3
 
+includes:
+  migrations:
+    taskfile: Taskfile-migrations.yml
+
 tasks:
   build: "cargo build --bin backend --release"
   run: "cargo run --bin backend"

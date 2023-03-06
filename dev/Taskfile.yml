@@ -3,7 +3,7 @@ version: '3'
 output: interleaved
 
 vars:
-  DEV_COMPOSE: "docker compose -f dev/docker-compose.yml"
+  DEV_COMPOSE: "docker compose --project-directory . -f dev/docker-compose.yml"
 
 tasks:
   compose: "{{.DEV_COMPOSE}} {{.CLI_ARGS}}"

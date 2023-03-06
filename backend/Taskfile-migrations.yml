@@ -1,0 +1,14 @@
+version: 3
+
+env:
+  SQLX_OFFLINE: "true"
+  DATABASE_URL: "postgres://backend:password@localhost"
+
+tasks:
+  sqlx: "sqlx {{.CLI_ARGS}}"
+  add: "sqlx migrate add {{.CLI_ARGS}}"
+  info: "sqlx migrate info"
+  run: "sqlx migrate run"
+  reset: "sqlx database reset -y"
+  generate_metadata: "cargo sqlx prepare"
+

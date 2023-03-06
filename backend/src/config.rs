@@ -8,14 +8,14 @@ const CONFIG_FILE_PATH_DEFAULT: &str = "config/backend";
 
 #[allow(unused)]
 #[derive(Clone, Debug, Deserialize)]
-pub struct ApiServerConfig {
+pub struct BackendConfig {
     pub bind_address: String,
     pub port: u16,
     pub database_connection_count: u32,
     pub database_url: String
 }
 
-pub fn read_config(custom_file_path: Option<&Path>) -> ApiServerConfig {
+pub fn read_config(custom_file_path: Option<&Path>) -> BackendConfig {
     let mut config_builder = Config::builder();
 
     match custom_file_path {
