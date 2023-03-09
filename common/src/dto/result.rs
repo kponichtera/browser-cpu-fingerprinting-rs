@@ -1,6 +1,6 @@
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct ResultDTO {
     pub model: String,
     pub user_agent: String,
