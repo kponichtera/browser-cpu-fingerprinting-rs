@@ -3,13 +3,24 @@ use common::dto::result::ResultDTO;
 use gloo_net::http::Request;
 use serde_json::{value::Value, Map};
 use yew::prelude::*;
-use crate::benchmarks::benchmark::Benchmark;
-use crate::benchmarks::dummy::DummyBenchmark;
+use crate::benchmarks::Benchmark;
+use crate::benchmarks::cpu_cores_count::CpuCoresCountBenchmark;
+use crate::benchmarks::data_cache_size::DataCacheSizeBenchmark;
+use crate::benchmarks::l1d_cache_associativity::L1dCacheAssociativityBenchmark;
+use crate::benchmarks::l1d_tlb_size::L1dTlbSizeBenchmark;
+use crate::benchmarks::page_size::PageSizeBenchmark;
+use crate::benchmarks::single_core_performance::SingleCorePerformanceBenchmark;
+
 
 #[function_component(App)]
 pub fn app() -> Html {
     let benchmarks: Vec<Box<dyn Benchmark>> = vec![
-        Box::new(DummyBenchmark {})
+        Box::new(CpuCoresCountBenchmark {}),
+        Box::new(DataCacheSizeBenchmark {}),
+        Box::new(L1dCacheAssociativityBenchmark {}),
+        Box::new(L1dTlbSizeBenchmark {}),
+        Box::new(PageSizeBenchmark {}),
+        Box::new(SingleCorePerformanceBenchmark {}),
     ];
 
     let response_indicator = use_state(|| String::from(""));
