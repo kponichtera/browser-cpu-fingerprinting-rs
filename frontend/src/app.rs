@@ -1,11 +1,11 @@
-use std::ops::Deref;
 use common::dto::result::ResultDTO;
+use std::ops::Deref;
 
+use crate::profilers::Profiler;
 use gloo_net::http::Request;
 use serde_json::value::Value;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
-use crate::profilers::Profiler;
 
 use crate::profilers::cache_associativity::*;
 use crate::profilers::cache_size::*;
@@ -17,7 +17,6 @@ use crate::profilers::prefetcher::*;
 use crate::profilers::single_core_performance::*;
 use crate::profilers::timer_precision::*;
 use crate::profilers::tlb_size::*;
-
 
 #[function_component(App)]
 pub fn app() -> Html {
@@ -55,7 +54,7 @@ pub fn app() -> Html {
                         .send()
                         .await
                         .unwrap()
-                        .status_text()
+                        .status_text(),
                 );
             });
         })
@@ -98,7 +97,9 @@ fn get_user_agent() -> Option<String> {
 }
 
 fn run_profilers<T>(profiler_prehook: T) -> (Vec<Value>, Vec<f32>)
-where T: FnOnce(&dyn Profiler) + Copy {
+where
+    T: FnOnce(&dyn Profiler) + Copy,
+{
     let profilers: Vec<Box<dyn Profiler>> = vec![
         Box::new(PageSizeProfiler {}),
         Box::new(PrefetcherProfiler {}),

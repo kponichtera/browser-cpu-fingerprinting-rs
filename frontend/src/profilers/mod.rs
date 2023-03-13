@@ -12,9 +12,7 @@ pub mod tlb_size;
 use serde_json::Value;
 
 pub trait Profiler {
-
     fn get_name(&self) -> &'static str;
 
     fn run(&self) -> (Value, f32);
-
 }

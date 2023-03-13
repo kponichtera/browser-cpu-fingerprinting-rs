@@ -1,11 +1,10 @@
+use crate::profilers::Profiler;
 use gloo_console::info;
 use serde_json::{json, value::Value};
-use crate::profilers::Profiler;
 
 pub struct MemoryLatenciesProfiler;
 
 impl Profiler for MemoryLatenciesProfiler {
-
     fn get_name(&self) -> &'static str {
         "Memory latencies"
     }
@@ -14,5 +13,4 @@ impl Profiler for MemoryLatenciesProfiler {
         info!("Running profiler:", self.get_name());
         (json!(null), 0.0)
     }
-
 }
