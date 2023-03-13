@@ -24,7 +24,7 @@ pub fn app() -> Html {
                 .unzip();
             let result = ResultDTO {
                 model: "foo".to_string(),
-                user_agent: "bar".to_string(), // might require navigator via wasm_bindgen
+                user_agent: get_user_agent().unwrap_or_else(|| "unknown".to_string()),
                 benchmark_results: Value::Object(results),
                 times: Value::Object(times),
             };
@@ -48,5 +48,14 @@ pub fn app() -> Html {
             <button onclick={run_tests}>{"Run tests"}</button>
             <p>{&*response_indicator}</p>
         </main>
+    }
+}
+
+fn get_user_agent() -> Option<String> {
+    let window = web_sys::window().expect("Missing window");
+    let user_agent = window.navigator().user_agent();
+    match user_agent {
+        Ok(user_agent) => Some(user_agent),
+        Err(_) => None,
     }
 }
