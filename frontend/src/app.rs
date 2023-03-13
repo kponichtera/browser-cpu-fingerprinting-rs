@@ -1,8 +1,10 @@
 use std::ops::Deref;
+use gloo_console::info;
 use common::dto::result::ResultDTO;
 
 use gloo_net::http::Request;
 use serde_json::{value::Value, Map};
+use web_sys::HtmlInputElement;
 use yew::prelude::*;
 use crate::profilers::Profiler;
 
@@ -20,18 +22,28 @@ use crate::profilers::tlb_size::*;
 
 #[function_component(App)]
 pub fn app() -> Html {
-    let status_label = use_state(|| String::from(""));
-    
+    let model_input_ref = use_node_ref();
+    let status_label_handle = use_state(String::default);
+    let model_input_handle = use_state(String::default);
+    let button_disabled_handle = use_state(|| true);
+    let input_disabled_handle = use_state(|| false);
+
     let run_tests = {
-        let status_label = status_label.clone();
+        let status_label = status_label_handle.clone();
+        let input_disabled_handle = input_disabled_handle.clone();
+        let button_disabled_handle = button_disabled_handle.clone();
+        let model_input_handle = model_input_handle.clone();
         Callback::from(move |_| {
             let status_label = status_label.clone();
+            input_disabled_handle.set(true);
+            button_disabled_handle.set(true);
+
             let (results, times): (Map<String, Value>, Map<String, Value>) = run_profilers(|profiler| {
                 let status_label = status_label.clone();
                 status_label.set(profiler.get_name().to_string());
             });
             let result = ResultDTO {
-                model: "foo".to_string(),
+                model: model_input_handle.to_string(),
                 user_agent: get_user_agent().unwrap_or_else(|| "unknown".to_string()),
                 benchmark_results: Value::Object(results),
                 times: Value::Object(times),
@@ -50,10 +62,34 @@ pub fn app() -> Html {
         })
     };
 
+    let on_model_change = {
+        let model_input_ref = model_input_ref.clone();
+        let model_input_handle = model_input_handle.clone();
+        let button_disabled_handle = button_disabled_handle.clone();
+
+        Callback::from(move |_| {
+            let input = model_input_ref.cast::<HtmlInputElement>();
+
+            if let Some(input) = input {
+                model_input_handle.set(input.value());
+                button_disabled_handle.set(input.value() == "");
+            }
+        })
+    };
+
+    let status_label = (*status_label_handle).clone();
+    let model_input = (*model_input_handle).clone();
+    let button_disabled = (*button_disabled_handle).clone();
+    let input_disabled = (*input_disabled_handle).clone();
+
     html! {
         <main>
-            <button onclick={run_tests}>{"Run tests"}</button>
-            <p>{&*status_label}</p>
+            <input id="model" ref={model_input_ref}
+                value={model_input}
+                oninput={on_model_change}
+                disabled={input_disabled}/>
+            <button onclick={run_tests} disabled={button_disabled}>{"Run tests"}</button>
+            <p>{status_label}</p>
         </main>
     }
 }
