@@ -15,8 +15,8 @@ pub async fn insert_result<'a>(
         ",
         &result.model,
         &result.user_agent,
-        &result.benchmark_results,
-        &result.times,
+        json!(result.benchmark_results),
+        json!(result.times),
         json!("[]")
     )
         .execute(pool)
