@@ -1,13 +1,16 @@
-use crate::benchmarks::dummy;
 use common::dto::result::ResultDTO;
 
 use gloo_net::http::Request;
 use serde_json::{value::Value, Map};
 use yew::prelude::*;
+use crate::benchmarks::benchmark::Benchmark;
+use crate::benchmarks::dummy::DummyBenchmark;
 
 #[function_component(App)]
 pub fn app() -> Html {
-    let benchmarks = vec![dummy::dummy_benchmark];
+    let benchmarks: Vec<Box<dyn Benchmark>> = vec![
+        Box::new(DummyBenchmark {})
+    ];
 
     let response_indicator = use_state(|| String::from(""));
     let run_tests = {
@@ -16,8 +19,8 @@ pub fn app() -> Html {
             let response_indicator = response_indicator.clone();
             let (results, times): (Map<String, Value>, Map<String, Value>) = benchmarks
                 .iter()
-                .map(|f| f())
-                .map(|(name, results, times)| ((name.clone(), results), (name, times)))
+                .map(|f| (f.get_name(), f.run()))
+                .map(|(name, (results, times))| ((name.to_string(), results), (name.to_string(), times)))
                 .unzip();
             let result = ResultDTO {
                 model: "foo".to_string(),

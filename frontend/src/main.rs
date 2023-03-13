@@ -1,6 +1,5 @@
 mod app;
-
-pub mod benchmarks;
+mod benchmarks;
 
 use app::App;
 

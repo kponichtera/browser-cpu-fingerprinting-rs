@@ -657,6 +657,7 @@ name = "frontend"
 version = "0.1.0"
 dependencies = [
  "common",
+ "gloo-console",
  "gloo-net",
  "serde_json",
  "wasm-bindgen-futures",

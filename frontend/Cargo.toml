@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 common = {path = "../common"}
 gloo-net = "0.2"
+gloo-console = "0.2"
 serde_json = "1.0"
 wasm-bindgen-futures = "0.4"
 yew = { version = "0.20", features = ["csr"] }
