@@ -10,9 +10,9 @@ impl Profiler for LoadBufferSizeProfiler {
         "Load buffer profiler"
     }
 
-    fn run(&self) -> (Value, Value) {
+    fn run(&self) -> (Value, f32) {
         info!("Running profiler:", self.get_name());
-        (json!(null), json!(null))
+        (json!(null), 0.0)
     }
 
 }

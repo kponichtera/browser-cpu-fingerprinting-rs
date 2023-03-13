@@ -10,9 +10,9 @@ impl Profiler for MemoryLatenciesProfiler {
         "Memory latencies"
     }
 
-    fn run(&self) -> (Value, Value) {
+    fn run(&self) -> (Value, f32) {
         info!("Running profiler:", self.get_name());
-        (json!(null), json!(null))
+        (json!(null), 0.0)
     }
 
 }

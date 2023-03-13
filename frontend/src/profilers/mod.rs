@@ -15,6 +15,6 @@ pub trait Profiler {
 
     fn get_name(&self) -> &'static str;
 
-    fn run(&self) -> (Value, Value);
+    fn run(&self) -> (Value, f32);
 
 }
