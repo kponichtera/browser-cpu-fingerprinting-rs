@@ -1,13 +1,13 @@
 use gloo_console::info;
 use serde_json::{json, value::Value};
-use crate::benchmarks::Benchmark;
+use crate::profilers::Profiler;
 
-pub struct L1dCacheAssociativityBenchmark;
+pub struct MultiCorePerformanceProfiler;
 
-impl Benchmark for L1dCacheAssociativityBenchmark {
+impl Profiler for MultiCorePerformanceProfiler {
 
     fn get_name(&self) -> &'static str {
-        "L1D cache associativity"
+        "Multi-core performance"
     }
 
     fn run(&self) -> (Value, Value) {

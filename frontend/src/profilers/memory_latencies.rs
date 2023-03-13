@@ -1,17 +1,17 @@
 use gloo_console::info;
 use serde_json::{json, value::Value};
-use crate::benchmarks::Benchmark;
+use crate::profilers::Profiler;
 
-pub struct L1dTlbSizeBenchmark;
+pub struct MemoryLatenciesProfiler;
 
-impl Benchmark for L1dTlbSizeBenchmark {
+impl Profiler for MemoryLatenciesProfiler {
 
     fn get_name(&self) -> &'static str {
-        "L1D TLB size"
+        "Memory latencies"
     }
 
     fn run(&self) -> (Value, Value) {
-        info!("Running benchmark:", self.get_name());
+        info!("Running profiler:", self.get_name());
         (json!(null), json!(null))
     }
 

@@ -1,17 +1,17 @@
 use gloo_console::info;
 use serde_json::{json, value::Value};
-use crate::benchmarks::Benchmark;
+use crate::profilers::Profiler;
 
-pub struct DataCacheSizeBenchmark;
+pub struct PageSizeProfiler;
 
-impl Benchmark for DataCacheSizeBenchmark {
+impl Profiler for PageSizeProfiler {
 
     fn get_name(&self) -> &'static str {
-        "Data cache size"
+        "Page size"
     }
 
     fn run(&self) -> (Value, Value) {
-        info!("Running benchmark:", self.get_name());
+        info!("Running profiler:", self.get_name());
         (json!(null), json!(null))
     }
 

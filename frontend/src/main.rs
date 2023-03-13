@@ -1,5 +1,5 @@
 mod app;
-mod benchmarks;
+mod profilers;
 
 use app::App;
 
