@@ -2,6 +2,7 @@ use common::dto::result::ResultDTO;
 use std::ops::Deref;
 use gloo_console::info;
 
+use crate::profilers::Clock;
 use crate::profilers::Profiler;
 use gloo_net::http::Request;
 use serde_json::value::Value;
@@ -36,6 +37,17 @@ pub fn app() -> Html {
             let status_label = status_label.clone();
             input_disabled_handle.set(true);
             button_disabled_handle.set(true);
+
+            let clock = Clock::new();
+            let cloned_clock = clock.clone();
+
+            info!(format!("Clock: {:?}", cloned_clock.read()));
+            
+            clock.increment().unwrap();
+            clock.increment().unwrap();
+
+            info!(format!("Clock: {:?}", cloned_clock.read()));
+
 
             let (results, times) = run_profilers(|profiler| {
                 let status_label = status_label.clone();

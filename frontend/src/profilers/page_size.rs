@@ -35,13 +35,13 @@ impl Profiler for PageSizeProfiler {
         let mut results: Vec<f64> = Vec::new();
 
         while START + size * 4 < MAXSIZE {
-            let start = performance.now();
+            // let start = performance.now();
 
             black_box(iteration(black_box(&mut buffer), black_box(size)));
 
-            let end = performance.now();
-            let diff = end - start;
-            results.push(diff);
+            // let end = performance.now();
+            // let diff = end - start;
+            // results.push(diff);
             size += 1;
         }
 

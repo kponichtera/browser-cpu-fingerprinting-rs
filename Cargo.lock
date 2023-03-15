@@ -660,6 +660,7 @@ dependencies = [
  "getrandom",
  "gloo-console",
  "gloo-net",
+ "js-sys",
  "rand",
  "serde_json",
  "wasm-bindgen",
