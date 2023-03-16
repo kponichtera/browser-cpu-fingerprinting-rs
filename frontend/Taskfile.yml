@@ -3,4 +3,5 @@ version: 3
 tasks:
   build: "trunk build --release"
   run: "trunk serve"
+  run_release: "trunk serve --release"
   clean: "trunk clean"
