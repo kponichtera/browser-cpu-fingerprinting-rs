@@ -1,5 +1,6 @@
 mod app;
 mod profilers;
+mod worker;
 
 use app::App;
 

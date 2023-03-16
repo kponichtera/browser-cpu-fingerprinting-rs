@@ -1,7 +1,7 @@
-use std::hint::black_box;
 use crate::profilers::Profiler;
 use gloo_console::info;
 use serde_json::{json, value::Value};
+use std::hint::black_box;
 
 // Constants
 const KB: usize = 1024;

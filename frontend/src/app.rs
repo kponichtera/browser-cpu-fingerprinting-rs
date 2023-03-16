@@ -1,9 +1,12 @@
 use common::dto::result::ResultDTO;
-use std::ops::Deref;
 use gloo_console::info;
+use yew_agent::Bridged;
+use std::ops::Deref;
+use std::rc::Rc;
 
 use crate::profilers::Clock;
 use crate::profilers::Profiler;
+use crate::worker::ClockWorker;
 use gloo_net::http::Request;
 use serde_json::value::Value;
 use web_sys::HtmlInputElement;
@@ -38,16 +41,24 @@ pub fn app() -> Html {
             input_disabled_handle.set(true);
             button_disabled_handle.set(true);
 
+            let clock_cb = {
+                move |_| {
+                    panic!("test");
+                }
+            };
+
+            let clock_worker = ClockWorker::bridge(Rc::new(clock_cb));
+            let t = clock_worker.
+
             let clock = Clock::new();
             let cloned_clock = clock.clone();
 
             info!(format!("Clock: {:?}", cloned_clock.read()));
-            
+
             clock.increment().unwrap();
             clock.increment().unwrap();
 
             info!(format!("Clock: {:?}", cloned_clock.read()));
-
 
             let (results, times) = run_profilers(|profiler| {
                 let status_label = status_label.clone();
@@ -128,7 +139,6 @@ where
 
     let mut results = vec![];
     let mut times = vec![];
-
 
     for profiler in profilers {
         profiler_prehook(profiler.deref());
