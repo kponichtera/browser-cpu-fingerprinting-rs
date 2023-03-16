@@ -9,6 +9,10 @@ pub mod single_core_performance;
 pub mod timer_precision;
 pub mod tlb_size;
 
+pub mod polyfills {
+    pub mod instant;
+}
+
 use serde_json::Value;
 
 pub trait Profiler {
