@@ -1,8 +1,4 @@
-mod app;
-mod profilers;
-mod worker;
-
-use app::App;
+use frontend::App;
 
 fn main() {
     yew::Renderer::<App>::new().render();

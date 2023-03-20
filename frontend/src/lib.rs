@@ -1,12 +1,18 @@
+pub mod agent;
+mod profilers;
+
 use common::dto::result::ResultDTO;
 use gloo_console::info;
-use yew_agent::Bridged;
+use yew_agent::PublicWorker;
+use yew_agent::UseBridgeHandle;
+use yew_agent::use_bridge;
 use std::ops::Deref;
 use std::rc::Rc;
 
-use crate::profilers::Clock;
+use crate::agent::clock_worker::Clock;
+use crate::agent::clock_worker::ClockWorker;
+// use crate::agent::clock_worker::ClockWorker;
 use crate::profilers::Profiler;
-use crate::worker::ClockWorker;
 use gloo_net::http::Request;
 use serde_json::value::Value;
 use web_sys::HtmlInputElement;
@@ -41,14 +47,15 @@ pub fn app() -> Html {
             input_disabled_handle.set(true);
             button_disabled_handle.set(true);
 
-            let clock_cb = {
-                move |_| {
-                    panic!("test");
-                }
-            };
 
-            let clock_worker = ClockWorker::bridge(Rc::new(clock_cb));
-            let t = clock_worker.
+            // let clock_cb = {
+            //     move |_| {
+            //         panic!("test");
+            //     }
+            // };
+
+            // let clock_worker = ClockWorker::bridge(Rc::new(clock_cb));
+            // let t = clock_worker.post
 
             let clock = Clock::new();
             let cloned_clock = clock.clone();
@@ -107,7 +114,34 @@ pub fn app() -> Html {
                 disabled={*input_disabled_handle}/>
             <button onclick={run_tests} disabled={*button_disabled_handle}>{"Run tests"}</button>
             <p>{(*status_label_handle).clone()}</p>
+            <ClockBridge/>
         </main>
+    }
+}
+
+#[function_component(ClockBridge)]
+pub fn clock_bridge() -> Html {
+    let counter = use_state(|| 0);
+
+    let bridge: UseBridgeHandle<ClockWorker> = {
+        let counter = counter.clone();
+        use_bridge(move |value| {
+            counter.set(value);
+        })
+    };
+
+    let run_worker = {
+        let bridge = bridge.clone();
+        Callback::from(move |_| {
+            bridge.send(());
+        })
+    };
+
+    html! {
+        <div>
+            <button onclick={run_worker}>{"Run worker"}</button>
+            {*counter}
+        </div>
     }
 }
 

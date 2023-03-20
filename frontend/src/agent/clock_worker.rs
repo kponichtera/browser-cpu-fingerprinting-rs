@@ -3,44 +3,36 @@ use wasm_bindgen::JsValue;
 use yew_agent::{WorkerLink, Worker, Public};
 
 pub struct ClockWorker {
-    // link: WorkerLink<Self>,
+    link: WorkerLink<Self>,
     clock: Clock,
-}
-
-impl ClockWorker {
-    pub fn get_clock(&self) -> Clock {
-        self.clock.clone()
-    }
 }
 
 impl Worker for ClockWorker {
     type Reach = Public<Self>;
 
-    type Message = Clock;
+    type Message = ();
 
     type Input = ();
 
-    type Output = ();
+    type Output = i64;
 
     fn create(link: WorkerLink<Self>) -> Self {
-        let clock = Clock::new();
-        link.send_message(clock.clone());
-        link.respond(id, output)
-    
         ClockWorker {
-            // link,
-            clock,
+            link,
+            clock: Clock::new(),
         }
     }
 
     fn update(&mut self, _msg: Self::Message) {
-        // do nothing
     }
 
-    fn handle_input(&mut self, _msg: Self::Input, _id: yew_agent::HandlerId) {
-        loop {
-            self.clock.increment();
-        }
+    fn handle_input(&mut self, _msg: Self::Input, id: yew_agent::HandlerId) {
+        // loop {
+        //     self.clock.increment();
+        // }
+        let _ = self.clock.increment();
+        let output = self.clock.read().unwrap();
+        self.link.respond(id, output);
     }
 
     fn name_of_resource() -> &'static str {
@@ -90,3 +82,5 @@ impl Clone for Clock {
         }
     }
 }
+
+
