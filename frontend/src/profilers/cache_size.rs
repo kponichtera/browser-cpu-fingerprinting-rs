@@ -11,8 +11,6 @@ use crate::profilers::Profiler;
 pub struct CacheSizeProfiler;
 
 const KB: usize = 1024;
-const MB: usize = KB * KB;
-
 
 #[derive(Debug, Serialize, Deserialize)]
 struct DataPoint {
