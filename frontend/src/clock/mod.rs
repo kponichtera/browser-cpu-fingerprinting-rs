@@ -1,6 +1,10 @@
+mod bridge;
+
+pub use bridge::*;
+
 use js_sys::{Atomics, BigInt64Array, SharedArrayBuffer};
 use wasm_bindgen::JsValue;
-use yew_agent::{WorkerLink, Worker, Public};
+use yew_agent::{Public, Worker, WorkerLink};
 
 pub struct ClockWorker {
     link: WorkerLink<Self>,
@@ -23,13 +27,9 @@ impl Worker for ClockWorker {
         }
     }
 
-    fn update(&mut self, _msg: Self::Message) {
-    }
+    fn update(&mut self, _msg: Self::Message) {}
 
     fn handle_input(&mut self, _msg: Self::Input, id: yew_agent::HandlerId) {
-        // loop {
-        //     self.clock.increment();
-        // }
         let _ = self.clock.increment();
         let output = self.clock.read().unwrap();
         self.link.respond(id, output);
@@ -38,6 +38,11 @@ impl Worker for ClockWorker {
     fn name_of_resource() -> &'static str {
         "worker.js"
     }
+}
+
+pub enum ClockMessage {
+    Start,
+    Count(i64),
 }
 
 /// Clock implementation using SharedArrayBuffer. Based on
@@ -82,5 +87,3 @@ impl Clone for Clock {
         }
     }
 }
-
-

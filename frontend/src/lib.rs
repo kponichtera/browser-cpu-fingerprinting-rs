@@ -1,16 +1,11 @@
-pub mod agent;
+pub mod clock;
 mod profilers;
 
 use common::dto::result::ResultDTO;
 use gloo_console::info;
-use yew_agent::PublicWorker;
-use yew_agent::UseBridgeHandle;
-use yew_agent::use_bridge;
 use std::ops::Deref;
-use std::rc::Rc;
 
-use crate::agent::clock_worker::Clock;
-use crate::agent::clock_worker::ClockWorker;
+use crate::clock::ClockBridge;
 // use crate::agent::clock_worker::ClockWorker;
 use crate::profilers::Profiler;
 use gloo_net::http::Request;
@@ -46,26 +41,6 @@ pub fn app() -> Html {
             let status_label = status_label.clone();
             input_disabled_handle.set(true);
             button_disabled_handle.set(true);
-
-
-            // let clock_cb = {
-            //     move |_| {
-            //         panic!("test");
-            //     }
-            // };
-
-            // let clock_worker = ClockWorker::bridge(Rc::new(clock_cb));
-            // let t = clock_worker.post
-
-            let clock = Clock::new();
-            let cloned_clock = clock.clone();
-
-            info!(format!("Clock: {:?}", cloned_clock.read()));
-
-            clock.increment().unwrap();
-            clock.increment().unwrap();
-
-            info!(format!("Clock: {:?}", cloned_clock.read()));
 
             let (results, times) = run_profilers(|profiler| {
                 let status_label = status_label.clone();
@@ -116,32 +91,6 @@ pub fn app() -> Html {
             <p>{(*status_label_handle).clone()}</p>
             <ClockBridge/>
         </main>
-    }
-}
-
-#[function_component(ClockBridge)]
-pub fn clock_bridge() -> Html {
-    let counter = use_state(|| 0);
-
-    let bridge: UseBridgeHandle<ClockWorker> = {
-        let counter = counter.clone();
-        use_bridge(move |value| {
-            counter.set(value);
-        })
-    };
-
-    let run_worker = {
-        let bridge = bridge.clone();
-        Callback::from(move |_| {
-            bridge.send(());
-        })
-    };
-
-    html! {
-        <div>
-            <button onclick={run_worker}>{"Run worker"}</button>
-            {*counter}
-        </div>
     }
 }
 
