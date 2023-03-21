@@ -4,7 +4,6 @@ use serde_json::{json, value::Value};
 use std::hint::black_box;
 
 // Constants
-const KB: usize = 1024;
 const MB: usize = 1024 * 1024;
 const MAXSIZE: usize = (MB + 100) / 8;
 
@@ -35,13 +34,13 @@ impl Profiler for PageSizeProfiler {
         let mut results: Vec<f64> = Vec::new();
 
         while START + size * 4 < MAXSIZE {
-            // let start = performance.now();
+            let start = performance.now();
 
             black_box(iteration(black_box(&mut buffer), black_box(size)));
 
-            // let end = performance.now();
-            // let diff = end - start;
-            // results.push(diff);
+            let end = performance.now();
+            let diff = end - start;
+            results.push(diff);
             size += 1;
         }
 

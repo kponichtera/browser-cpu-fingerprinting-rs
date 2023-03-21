@@ -2,11 +2,9 @@ pub mod clock;
 mod profilers;
 
 use common::dto::result::ResultDTO;
-use gloo_console::info;
 use std::ops::Deref;
 
 use crate::clock::ClockBridge;
-// use crate::agent::clock_worker::ClockWorker;
 use crate::profilers::Profiler;
 use gloo_net::http::Request;
 use serde_json::value::Value;
@@ -109,15 +107,15 @@ where
 {
     let profilers: Vec<Box<dyn Profiler>> = vec![
         Box::new(PageSizeProfiler {}),
-        // Box::new(PrefetcherProfiler {}),
-        // Box::new(CacheAssociativityProfiler {}),
-        // Box::new(CacheSizeProfiler {}),
-        // Box::new(TlbSizeProfiler {}),
-        // Box::new(TimerPrecisionProfiler {}),
-        // Box::new(MemoryLatenciesProfiler {}),
-        // Box::new(LoadBufferSizeProfiler {}),
-        // Box::new(SingleCorePerformanceProfiler {}),
-        // Box::new(MultiCorePerformanceProfiler {}),
+        Box::new(PrefetcherProfiler {}),
+        Box::new(CacheAssociativityProfiler {}),
+        Box::new(CacheSizeProfiler {}),
+        Box::new(TlbSizeProfiler {}),
+        Box::new(TimerPrecisionProfiler {}),
+        Box::new(MemoryLatenciesProfiler {}),
+        Box::new(LoadBufferSizeProfiler {}),
+        Box::new(SingleCorePerformanceProfiler {}),
+        Box::new(MultiCorePerformanceProfiler {}),
     ];
 
     let mut results = vec![];
@@ -126,7 +124,6 @@ where
     for profiler in profilers {
         profiler_prehook(profiler.deref());
         let result = profiler.run();
-        info!("so far so good end");
         results.push(result.0);
         times.push(result.1);
     }
