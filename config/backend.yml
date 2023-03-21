@@ -1,4 +1,4 @@
 bind_address: "127.0.0.1"
 port: 8000
 database_connection_count: 5
-database_url: "postgres://backend:password@localhost:15432"
+database_url: "postgres://backend_dev:backend_dev@localhost:15432/backend_dev"
