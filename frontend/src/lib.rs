@@ -1,6 +1,10 @@
+pub mod clock;
+mod profilers;
+
 use common::dto::result::ResultDTO;
 use std::ops::Deref;
 
+use crate::clock::ClockBridge;
 use crate::profilers::Profiler;
 use gloo_net::http::Request;
 use serde_json::value::Value;
@@ -83,6 +87,7 @@ pub fn app() -> Html {
                 disabled={*input_disabled_handle}/>
             <button onclick={run_tests} disabled={*button_disabled_handle}>{"Run tests"}</button>
             <p>{(*status_label_handle).clone()}</p>
+            <ClockBridge/>
         </main>
     }
 }
