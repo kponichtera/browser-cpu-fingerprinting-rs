@@ -662,6 +662,7 @@ dependencies = [
  "gloo-net",
  "js-sys",
  "rand",
+ "serde",
  "serde_json",
  "wasm-bindgen",
  "wasm-bindgen-futures",
