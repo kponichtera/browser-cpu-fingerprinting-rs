@@ -1,0 +1,14 @@
+version: '3'
+
+output: interleaved
+
+vars:
+  DEV_COMPOSE: "docker compose -p browser-cpu-fingerprinting-rs-deploy --project-directory . -f deploy/docker-compose.yml"
+
+tasks:
+  compose: "{{.DEV_COMPOSE}} {{.CLI_ARGS}}"
+  compose:up: "{{.DEV_COMPOSE}} up --build {{.CLI_ARGS}}"
+  compose:start: "{{.DEV_COMPOSE}} up --detach {{.CLI_ARGS}}"
+  compose:stop: "{{.DEV_COMPOSE}} stop {{.CLI_ARGS}}"
+  compose:down: "{{.DEV_COMPOSE}} down --volumes {{.CLI_ARGS}}"
+  compose:logs: "{{.DEV_COMPOSE}} logs -f {{.CLI_ARGS}}"

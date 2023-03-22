@@ -5,5 +5,5 @@ includes:
     taskfile: Taskfile-migrations.yml
 
 tasks:
-  build: "cargo build --bin backend --release"
+  build: "cargo build --bin backend --release {{.CLI_ARGS}}"
   run: "cargo run --bin backend"

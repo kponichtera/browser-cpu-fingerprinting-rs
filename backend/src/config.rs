@@ -3,7 +3,7 @@ use log::info;
 use serde::Deserialize;
 use std::path::Path;
 
-const CONFIG_ENV_PREFIX: &str = "API_SERVER";
+const CONFIG_ENV_PREFIX: &str = "BACKEND";
 const CONFIG_FILE_PATH_DEFAULT: &str = "config/backend";
 
 #[allow(unused)]
@@ -27,9 +27,16 @@ pub fn read_config(custom_file_path: Option<&Path>) -> BackendConfig {
             config_builder = config_builder.add_source(config::File::from(custom_file_path));
         }
         None => {
-            info!("Using default configuration path");
-            config_builder =
-                config_builder.add_source(config::File::with_name(CONFIG_FILE_PATH_DEFAULT));
+            let default_path = Path::new(CONFIG_FILE_PATH_DEFAULT);
+
+            if default_path.exists() {
+                info!("Using default configuration path");
+                config_builder =
+                    config_builder.add_source(config::File::from(default_path));
+            } else {
+                info!("No default configuration file detected - using only environment variables");
+            }
+
         }
     }
 
