@@ -6,7 +6,6 @@ use std::ops::{Add, Sub, AddAssign, SubAssign};
 
 pub use std::time::*;
 
-#[cfg(target_arch = "wasm32")]
 #[wasm_bindgen(inline_js = r#"
 export function performance_now() {
   return performance.now();
@@ -15,11 +14,9 @@ extern "C" {
     fn performance_now() -> f64;
 }
 
-#[cfg(target_arch = "wasm32")]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Instant(u64);
 
-#[cfg(target_arch = "wasm32")]
 impl Instant {
     pub fn now() -> Self { Self((performance_now() * 1000.0) as u64) }
     pub fn duration_since(&self, earlier: Instant) -> Duration { Duration::from_micros(self.0 - earlier.0) }
