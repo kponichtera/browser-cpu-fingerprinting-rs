@@ -46,6 +46,7 @@ impl Profiler for CacheSizeProfiler {
                 indices[1..].windows(2).for_each(|w| list[w[0]] = w[1]);
                 list[indices[size - 1]] = indices[0];
 
+                // warmup step; to make sure that the data is in the cache
                 let mut p = 0;
                 for _ in 0..size {
                     // after we have established good data, check if these are necessary
