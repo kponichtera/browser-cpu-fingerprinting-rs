@@ -1,5 +1,5 @@
-use frontend::App;
+use frontend::AppRoot;
 
 fn main() {
-    yew::Renderer::<App>::new().render();
+    yew::Renderer::<AppRoot>::new().render();
 }

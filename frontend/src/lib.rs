@@ -1,8 +1,12 @@
 pub mod clock;
+pub mod worker;
 mod profilers;
 
+use std::collections::VecDeque;
 use common::dto::result::ResultDTO;
 use std::ops::Deref;
+use std::rc::Rc;
+use gloo_console::info;
 
 use crate::clock::ClockBridge;
 use crate::profilers::Profiler;
@@ -10,6 +14,7 @@ use gloo_net::http::Request;
 use serde_json::value::Value;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
+use yew_agent::{Bridge, Bridged};
 
 use crate::profilers::cache_associativity::*;
 use crate::profilers::cache_size::*;
@@ -21,74 +26,156 @@ use crate::profilers::prefetcher::*;
 use crate::profilers::single_core_performance::*;
 use crate::profilers::timer_precision::*;
 use crate::profilers::tlb_size::*;
+use crate::worker::{BenchmarkResult, BenchmarkType, BenchmarkWorker, BenchmarkInput};
 
-#[function_component(App)]
-pub fn app() -> Html {
-    let model_input_ref = use_node_ref();
-    let status_label_handle = use_state(String::default);
-    let model_input_handle = use_state(String::default);
-    let button_disabled_handle = use_state(|| true);
-    let input_disabled_handle = use_state(|| false);
+pub enum AppRootMessage {
+    ChangeModel(String),
+    StartBenchmarks,
+    BenchmarkComplete(BenchmarkResult),
+    BenchmarksFinished(String),
+}
 
-    let run_tests = {
-        let status_label = status_label_handle.clone();
-        let input_disabled_handle = input_disabled_handle.clone();
-        let button_disabled_handle = button_disabled_handle.clone();
-        let model_input_handle = model_input_handle.clone();
-        Callback::from(move |_| {
-            let status_label = status_label.clone();
-            input_disabled_handle.set(true);
-            button_disabled_handle.set(true);
+pub struct AppRoot {
+    bridge: Box<dyn Bridge<BenchmarkWorker>>,
 
-            let (results, times) = run_profilers(|profiler| {
-                let status_label = status_label.clone();
-                status_label.set(profiler.get_name().to_string());
-            });
-            let result = ResultDTO {
-                model: model_input_handle.to_string(),
-                user_agent: get_user_agent().unwrap_or_else(|| "unknown".to_string()),
-                benchmark_results: results,
-                times,
-            };
-            wasm_bindgen_futures::spawn_local(async move {
-                status_label.set(
-                    Request::post("/api/result/upload")
-                        .json(&result)
-                        .unwrap()
-                        .send()
-                        .await
-                        .unwrap()
-                        .status_text(),
-                );
-            });
-        })
-    };
+    model_input: String,
+    status_label: String,
+    button_disabled: bool,
+    input_disabled: bool,
 
-    let on_model_change = {
-        let model_input_ref = model_input_ref.clone();
-        let model_input_handle = model_input_handle.clone();
-        let button_disabled_handle = button_disabled_handle.clone();
+    benchmark_results: Vec<BenchmarkResult>,
+    remaining_benchmarks: VecDeque<BenchmarkType>,
+}
 
-        Callback::from(move |_| {
-            let input = model_input_ref.cast::<HtmlInputElement>();
+impl Component for AppRoot {
+    type Message = AppRootMessage;
+    type Properties = ();
 
-            if let Some(input) = input {
-                model_input_handle.set(input.value());
-                button_disabled_handle.set(input.value() == "");
+    fn create(ctx: &Context<Self>) -> Self {
+        let link = ctx.link().clone();
+        let worker_result_callback = move |result| {
+            link.send_message(AppRootMessage::BenchmarkComplete(result))
+        };
+
+        AppRoot {
+            bridge: BenchmarkWorker::bridge(Rc::new(worker_result_callback)),
+            model_input: String::default(),
+            status_label: String::default(),
+            button_disabled: false,
+            input_disabled: false,
+            benchmark_results: Vec::new(),
+            remaining_benchmarks: VecDeque::new(),
+        }
+    }
+
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
+        match msg {
+            AppRootMessage::ChangeModel(new_model) => {
+                self.model_input = new_model;
+                true
             }
-        })
-    };
+            AppRootMessage::StartBenchmarks => {
+                self.start_benchmarks();
+                true
+            }
+            AppRootMessage::BenchmarkComplete(result) => {
+                self.handle_benchmark_complete(ctx, result);
+                true
+            }
+            AppRootMessage::BenchmarksFinished(status) => {
+                self.handle_benchmarks_finished(status);
+                true
+            }
+        }
+    }
 
-    html! {
-        <main>
-            <input id="model" ref={model_input_ref}
-                value={(*model_input_handle).clone()}
-                oninput={on_model_change}
-                disabled={*input_disabled_handle}/>
-            <button onclick={run_tests} disabled={*button_disabled_handle}>{"Run tests"}</button>
-            <p>{(*status_label_handle).clone()}</p>
-            <ClockBridge/>
-        </main>
+
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let button_disabled = self.button_disabled || self.model_input.is_empty();
+
+        html! {
+            <main>
+                <input id="model"
+                    value={self.model_input.clone()}
+                    oninput={ctx.link().callback(|e: InputEvent| {
+                                let input: HtmlInputElement = e.target_unchecked_into();
+                                AppRootMessage::ChangeModel(input.value())
+                            })}
+                    disabled={self.input_disabled}/>
+                <button onclick={ctx.link().callback(|_| { AppRootMessage::StartBenchmarks })}
+                        disabled={button_disabled}>
+                    { "Run tests" }
+                </button>
+                <p>{self.status_label.clone()}</p>
+                <ClockBridge/>
+            </main>
+        }
+    }
+}
+
+impl AppRoot {
+
+    fn start_benchmarks(&mut self) {
+        self.button_disabled = true;
+        self.input_disabled = true;
+        self.benchmark_results = vec![];
+
+        self.remaining_benchmarks = VecDeque::from(vec![
+            // TODO: Add remaining benchmarks
+            BenchmarkType::Dummy
+        ]);
+
+        // Start with first benchmark
+        let benchmark = self.remaining_benchmarks.pop_front().expect("No benchmarks specified");
+        self.status_label = benchmark.to_string();
+        self.bridge.send(BenchmarkInput { benchmark });
+    }
+
+    fn handle_benchmark_complete(&mut self, ctx: &Context<Self>, result: BenchmarkResult) {
+        self.benchmark_results.push(result);
+
+        let next_benchmark = self.remaining_benchmarks.pop_front();
+        match next_benchmark {
+            Some(benchmark) => {
+                // Run next benchmark
+                self.status_label = benchmark.to_string();
+                self.bridge.send(BenchmarkInput { benchmark });
+            }
+            None => {
+                // No more benchmarks - send results to backend
+                self.send_result(ctx);
+            }
+        }
+    }
+
+    fn send_result(&self, ctx: &Context<Self>) {
+        // TODO: Parse and send results
+        let result = ResultDTO {
+            model: self.model_input.clone(),
+            user_agent: get_user_agent().unwrap_or_else(|| "unknown".to_string()),
+            benchmark_results: vec![],
+            times: vec![],
+        };
+
+        let link = ctx.link().clone();
+
+        wasm_bindgen_futures::spawn_local(async move {
+            let status = Request::post("/api/result/upload")
+                .json(&result)
+                .unwrap()
+                .send()
+                .await
+                .unwrap()
+                .status_text();
+
+            link.send_message(AppRootMessage::BenchmarksFinished(status));
+        });
+    }
+
+    fn handle_benchmarks_finished(&mut self, status: String) {
+        self.button_disabled = false;
+        self.input_disabled = false;
+        self.status_label = status;
     }
 }
 
@@ -101,9 +188,10 @@ fn get_user_agent() -> Option<String> {
     }
 }
 
+/// TODO: For removal once benchmarks are fully handled by dedicated worker(s)
 fn run_profilers<T>(profiler_prehook: T) -> (Vec<Value>, Vec<f32>)
-where
-    T: FnOnce(&dyn Profiler) + Copy,
+    where
+        T: FnOnce(&dyn Profiler) + Copy,
 {
     let profilers: Vec<Box<dyn Profiler>> = vec![
         Box::new(PageSizeProfiler {}),
