@@ -4,7 +4,7 @@ use serde::Deserialize;
 use std::path::Path;
 
 const CONFIG_ENV_PREFIX: &str = "BACKEND";
-const CONFIG_FILE_PATH_DEFAULT: &str = "config/backend";
+const CONFIG_FILE_PATH_DEFAULT: &str = "config/backend.yml";
 
 #[allow(unused)]
 #[derive(Clone, Debug, Deserialize)]

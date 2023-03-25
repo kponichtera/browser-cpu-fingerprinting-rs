@@ -1,9 +1,8 @@
 mod benchmarks;
 
 use std::fmt::{Display, Formatter};
-use yew_agent::{HandlerId, Private, Public, Worker, WorkerLink};
+use yew_agent::{HandlerId, Private, Worker, WorkerLink};
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use crate::worker::benchmarks::dummy::run_dummy_benchmark;
 
 #[derive(Serialize, Deserialize)]
@@ -28,11 +27,11 @@ pub struct BenchmarkInput {
 
 #[derive(Serialize, Deserialize)]
 pub struct BenchmarkResult {
-    benchmark: BenchmarkType,
+    pub benchmark: BenchmarkType,
     /// Workaround for broken (de)serialization of raw JSON value.
     /// Turn to proper serde_json::Value after receiving.
-    result_json: String,
-    time: f32
+    pub result_json: String,
+    pub time: f32
 }
 
 pub struct BenchmarkWorker {
@@ -69,7 +68,7 @@ impl Worker for BenchmarkWorker {
 impl BenchmarkWorker {
 
     fn run_benchmark(&self, benchmark: BenchmarkType) -> BenchmarkResult {
-        return match benchmark {
+        match benchmark {
             BenchmarkType::Dummy => run_dummy_benchmark()
         }
     }
