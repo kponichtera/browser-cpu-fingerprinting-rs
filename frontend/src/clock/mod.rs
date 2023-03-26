@@ -1,6 +1,5 @@
 use js_sys::{Atomics, BigInt64Array, SharedArrayBuffer};
 use wasm_bindgen::JsValue;
-use yew_agent::{Worker, WorkerLink};
 
 pub const CLOCK_MESSAGE_READY: &str = "clock_ready";
 pub const CLOCK_MESSAGE_STARTED: &str = "clock_started";

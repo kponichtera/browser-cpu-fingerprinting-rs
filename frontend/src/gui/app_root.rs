@@ -1,8 +1,7 @@
-use std::collections::VecDeque;
 use common::dto::result::ResultDTO;
+use std::collections::VecDeque;
 use std::ops::Deref;
 use std::rc::Rc;
-use gloo_console::info;
 
 use crate::profilers::Profiler;
 use gloo_net::http::Request;
@@ -21,7 +20,7 @@ use crate::profilers::prefetcher::*;
 use crate::profilers::single_core_performance::*;
 use crate::profilers::timer_precision::*;
 use crate::profilers::tlb_size::*;
-use crate::worker::{BenchmarkResult, BenchmarkType, BenchmarkWorker, BenchmarkInput};
+use crate::worker::{BenchmarkInput, BenchmarkResult, BenchmarkType, BenchmarkWorker};
 
 pub enum AppRootMessage {
     ChangeModel(String),
@@ -48,9 +47,8 @@ impl Component for AppRoot {
 
     fn create(ctx: &Context<Self>) -> Self {
         let link = ctx.link().clone();
-        let worker_result_callback = move |result| {
-            link.send_message(AppRootMessage::BenchmarkComplete(result))
-        };
+        let worker_result_callback =
+            move |result| link.send_message(AppRootMessage::BenchmarkComplete(result));
 
         AppRoot {
             bridge: BenchmarkWorker::bridge(Rc::new(worker_result_callback)),
@@ -84,7 +82,6 @@ impl Component for AppRoot {
         }
     }
 
-
     fn view(&self, ctx: &Context<Self>) -> Html {
         let button_disabled = self.button_disabled || self.model_input.is_empty();
 
@@ -108,7 +105,6 @@ impl Component for AppRoot {
 }
 
 impl AppRoot {
-
     fn start_benchmarks(&mut self) {
         self.button_disabled = true;
         self.input_disabled = true;
@@ -116,11 +112,14 @@ impl AppRoot {
 
         self.remaining_benchmarks = VecDeque::from(vec![
             // TODO: Add remaining benchmarks
-            BenchmarkType::PageSize
+            BenchmarkType::PageSize,
         ]);
 
         // Start with first benchmark
-        let benchmark = self.remaining_benchmarks.pop_front().expect("No benchmarks specified");
+        let benchmark = self
+            .remaining_benchmarks
+            .pop_front()
+            .expect("No benchmarks specified");
         self.status_label = benchmark.to_string();
         self.bridge.send(BenchmarkInput { benchmark });
     }
@@ -173,7 +172,6 @@ impl AppRoot {
         self.status_label = status;
     }
 
-
     fn parse_results(&self) -> (Vec<Value>, Vec<f32>) {
         let mut results = vec![];
         let mut times = vec![];
@@ -201,8 +199,8 @@ fn get_user_agent() -> Option<String> {
 
 /// TODO: For removal once benchmarks are fully handled by dedicated worker(s)
 fn run_profilers<T>(profiler_prehook: T) -> (Vec<Value>, Vec<f32>)
-    where
-        T: FnOnce(&dyn Profiler) + Copy,
+where
+    T: FnOnce(&dyn Profiler) + Copy,
 {
     let profilers: Vec<Box<dyn Profiler>> = vec![
         Box::new(PageSizeProfiler {}),
@@ -229,4 +227,3 @@ fn run_profilers<T>(profiler_prehook: T) -> (Vec<Value>, Vec<f32>)
 
     (results, times)
 }
-

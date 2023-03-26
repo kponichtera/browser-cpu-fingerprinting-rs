@@ -1,12 +1,12 @@
 mod benchmarks;
 mod clock;
 
-use std::fmt::{Display, Formatter};
-use yew_agent::{HandlerId, Private, Worker, WorkerLink};
-use serde::{Deserialize, Serialize};
 use crate::clock::Clock;
 use crate::worker::benchmarks::page_size::run_page_size_benchmark;
 use crate::worker::clock::start_clock_worker;
+use serde::{Deserialize, Serialize};
+use std::fmt::{Display, Formatter};
+use yew_agent::{HandlerId, Private, Worker, WorkerLink};
 
 #[derive(Serialize, Deserialize, Copy, Clone)]
 pub enum BenchmarkType {
@@ -14,13 +14,11 @@ pub enum BenchmarkType {
 }
 
 impl Display for BenchmarkType {
-
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             BenchmarkType::PageSize => write!(f, "Page size"),
         }
     }
-
 }
 
 impl BenchmarkType {
@@ -33,7 +31,7 @@ impl BenchmarkType {
 
 #[derive(Serialize, Deserialize)]
 pub struct BenchmarkInput {
-    pub benchmark: BenchmarkType
+    pub benchmark: BenchmarkType,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -42,7 +40,7 @@ pub struct BenchmarkResult {
     /// Workaround for broken (de)serialization of raw JSON value.
     /// Turn to proper serde_json::Value after receiving.
     pub result_json: String,
-    pub time: f32
+    pub time: f32,
 }
 
 pub struct BenchmarkWorker {
@@ -56,13 +54,10 @@ impl Worker for BenchmarkWorker {
     type Output = BenchmarkResult;
 
     fn create(link: WorkerLink<Self>) -> Self {
-        BenchmarkWorker {
-            link
-        }
+        BenchmarkWorker { link }
     }
 
-    fn update(&mut self, _msg: Self::Message) {
-    }
+    fn update(&mut self, _msg: Self::Message) {}
 
     fn handle_input(&mut self, msg: Self::Input, id: HandlerId) {
         if msg.benchmark.needs_clock() {
@@ -72,19 +67,18 @@ impl Worker for BenchmarkWorker {
                 let result = run_benchmark(msg.benchmark, Some(clock));
                 clock_worker.terminate();
                 link.respond(id, result);
-            }).expect("clock worker should start");
+            })
+            .expect("clock worker should start");
         } else {
             // run benchmark directly
             let result = run_benchmark(msg.benchmark, None);
             self.link.respond(id, result);
         }
-
     }
 
     fn name_of_resource() -> &'static str {
         "benchmark_worker.js"
     }
-
 }
 
 fn run_benchmark(benchmark: BenchmarkType, clock: Option<Clock>) -> BenchmarkResult {

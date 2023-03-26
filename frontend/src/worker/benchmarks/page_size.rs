@@ -1,14 +1,11 @@
 use gloo_console::info;
 use serde_json::json;
 use std::hint::black_box;
-use gloo_timers::callback::Timeout;
-use js_sys::Atomics;
-use serde::{Deserialize, Serialize};
-use web_sys::console::info;
+
+use serde::Serialize;
+
 use crate::clock::Clock;
 use crate::worker::{BenchmarkResult, BenchmarkType};
-use crate::worker::benchmarks::get_performance;
-use crate::worker::clock::start_clock_worker;
 
 // Constants
 const MB: usize = 1024 * 1024;
@@ -61,7 +58,7 @@ pub fn run_page_size_benchmark(clock: Clock) -> BenchmarkResult {
     BenchmarkResult {
         benchmark: BenchmarkType::PageSize,
         result_json: json!(result).to_string(),
-        time: 0.0
+        time: 0.0,
     }
 }
 

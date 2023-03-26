@@ -1,12 +1,14 @@
 use gloo_console::info;
-use js_sys::{Array, Atomics, BigInt64Array, BigUint64Array, Int32Array, JsString, SharedArrayBuffer};
-use wasm_bindgen::JsValue;
+use js_sys::{Array, JsString};
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsValue;
 use web_sys::{Blob, BlobPropertyBag, MessageEvent, Url, Worker};
-use web_sys::console::info;
+
 use crate::clock::{Clock, CLOCK_MESSAGE_READY, CLOCK_MESSAGE_STARTED};
 
-pub fn start_clock_worker<F: Fn(Clock, Worker) + 'static>(on_clock_started: F) -> Result<(), JsValue> {
+pub fn start_clock_worker<F: Fn(Clock, Worker) + 'static>(
+    on_clock_started: F,
+) -> Result<(), JsValue> {
     // let origin = window()
     //     .expect("window to be available")
     //     .location()
@@ -46,17 +48,17 @@ pub fn start_clock_worker<F: Fn(Clock, Worker) + 'static>(on_clock_started: F) -
             CLOCK_MESSAGE_STARTED => {
                 info!("Sending buffer to the clock worker");
                 on_clock_started(clock_clone, worker_clone);
-            },
+            }
             CLOCK_MESSAGE_READY => {
                 let shared_buffer_clone = shared_buffer_clone.clone();
                 let worker_clone = worker_clone.clone();
                 info!("Sending buffer to the clock worker");
-                worker_clone.post_message(&JsValue::from(shared_buffer_clone))
+                worker_clone
+                    .post_message(&JsValue::from(shared_buffer_clone))
                     .expect("worker is having shared array buffer sent to it.");
             }
             _ => {}
         }
-
     }) as Box<dyn Fn(MessageEvent)>);
     worker.set_onmessage(Some(onmessage.as_ref().unchecked_ref()));
     onmessage.forget();

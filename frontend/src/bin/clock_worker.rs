@@ -1,8 +1,8 @@
+use frontend::clock::{Clock, CLOCK_MESSAGE_READY, CLOCK_MESSAGE_STARTED};
 use gloo_console::info;
-use js_sys::{Array, Atomics, BigUint64Array, JsString, SharedArrayBuffer};
+use js_sys::{JsString, SharedArrayBuffer};
 use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::{DedicatedWorkerGlobalScope, MessageEvent};
-use frontend::clock::{Clock, CLOCK_MESSAGE_READY, CLOCK_MESSAGE_STARTED};
 
 fn main() {
     console_error_panic_hook::set_once();
@@ -21,7 +21,7 @@ fn main() {
             .expect("posting started message succeeds");
 
         loop {
-            let value = clock.increment().unwrap();
+            let _value = clock.increment().unwrap();
             // if value % 100000 == 0 {
             //     info!("Clock value: ", value)
             // }
