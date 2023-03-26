@@ -2,6 +2,7 @@ use gloo_console::info;
 use serde_json::json;
 use std::hint::black_box;
 use gloo_timers::callback::Timeout;
+use js_sys::Atomics;
 use web_sys::console::info;
 use crate::worker::{BenchmarkResult, BenchmarkType};
 use crate::worker::benchmarks::get_performance;
@@ -22,31 +23,32 @@ pub fn run_page_size_benchmark() -> BenchmarkResult {
 
     let (clock_worker, clock_data) = start_clock_worker().expect("clock worker should start");
 
-    clock_worker.terminate();
+    let mut buffer = [0; MAXSIZE];
+    let mut size = 0;
 
-    // let performance = get_performance();
-    //
-    // let mut buffer = [0; MAXSIZE];
-    // let mut size = 0;
-    //
-    // let mut results: Vec<f64> = Vec::new();
-    //
-    // while START + size * 4 < MAXSIZE {
-    //     let start = performance.now();
-    //
-    //     black_box(iteration(black_box(&mut buffer), black_box(size)));
-    //
-    //     let end = performance.now();
-    //     let diff = end - start;
-    //     results.push(diff);
-    //     size += 1;
-    // }
-    //
-    // for (index, data) in results.into_iter().enumerate() {
-    //     if data != 0.0 {
-    //         info!(format!("{}: {}", index, data));
-    //     }
-    // }
+    let mut results: Vec<i64> = Vec::new();
+
+    while START + size * 4 < MAXSIZE {
+        let start = Atomics::add_bigint(&clock_data, 0, 0)
+            .expect("fetching clock value works");
+
+        black_box(iteration(black_box(&mut buffer), black_box(size)));
+
+        let end = Atomics::add_bigint(&clock_data, 0, 0)
+            .expect("fetching clock value works");
+
+        let diff = end - start;
+        results.push(diff);
+        size += 1;
+    }
+
+    for (index, data) in results.into_iter().enumerate() {
+        // if data != 0 {
+            info!(format!("{}: {}", index, data));
+        // }
+    }
+
+    clock_worker.terminate();
 
     BenchmarkResult {
         benchmark: BenchmarkType::PageSize,
