@@ -2,6 +2,7 @@ use std::collections::VecDeque;
 use common::dto::result::ResultDTO;
 use std::ops::Deref;
 use std::rc::Rc;
+use gloo_console::info;
 
 use crate::profilers::Profiler;
 use gloo_net::http::Request;
@@ -178,8 +179,10 @@ impl AppRoot {
         let mut times = vec![];
 
         for result in self.benchmark_results.iter() {
+            let value = serde_json::from_str::<Value>(result.result_json.clone().as_str()).unwrap();
+
             // TODO: Cloning the whole result JSON is not very optimal
-            results.push(result.result_json.clone().into());
+            results.push(value);
             times.push(result.time);
         }
 
