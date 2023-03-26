@@ -1,20 +1,21 @@
 mod benchmarks;
+mod clock;
 
 use std::fmt::{Display, Formatter};
 use yew_agent::{HandlerId, Private, Worker, WorkerLink};
 use serde::{Deserialize, Serialize};
-use crate::worker::benchmarks::dummy::run_dummy_benchmark;
+use crate::worker::benchmarks::page_size::run_page_size_benchmark;
 
 #[derive(Serialize, Deserialize)]
 pub enum BenchmarkType {
-    Dummy
+    PageSize,
 }
 
 impl Display for BenchmarkType {
 
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            BenchmarkType::Dummy => write!(f, "Dummy")
+            BenchmarkType::PageSize => write!(f, "Page size"),
         }
     }
 
@@ -69,7 +70,7 @@ impl BenchmarkWorker {
 
     fn run_benchmark(&self, benchmark: BenchmarkType) -> BenchmarkResult {
         match benchmark {
-            BenchmarkType::Dummy => run_dummy_benchmark()
+            BenchmarkType::PageSize => run_page_size_benchmark(),
         }
     }
 
