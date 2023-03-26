@@ -50,7 +50,6 @@ impl Profiler for CacheSizeProfiler {
                 let mut indices = (0..size).collect::<Vec<_>>();
                 indices.shuffle(&mut rand);
 
-
                 // the algorithm may need to be verified for correctness
                 indices[1..].windows(2).for_each(|w| list[w[0]] = w[1]);
                 list[indices[size - 1]] = indices[0];
@@ -62,7 +61,10 @@ impl Profiler for CacheSizeProfiler {
                     p = std::hint::black_box(list[p]);
                 }
                 let end = Instant::now();
-                DataPoint { x: (size / KB) as i16, y: end.duration_since(start) }
+                DataPoint {
+                    x: (size / KB) as i16,
+                    y: end.duration_since(start),
+                }
             })
             .collect::<Vec<_>>();
         (json!(result), 0.0)

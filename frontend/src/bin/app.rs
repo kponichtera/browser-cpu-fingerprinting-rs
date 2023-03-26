@@ -1,5 +1,6 @@
-use frontend::App;
+use frontend::gui::app_root::AppRoot;
 
 fn main() {
-    yew::Renderer::<App>::new().render();
+    console_error_panic_hook::set_once();
+    yew::Renderer::<AppRoot>::new().render();
 }
