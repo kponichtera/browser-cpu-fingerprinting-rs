@@ -1,22 +1,27 @@
-mod benchmarks;
-mod clock;
+use std::fmt::{Display, Formatter};
+
+use serde::{Deserialize, Serialize};
+use yew_agent::{HandlerId, Private, Worker, WorkerLink};
 
 use crate::clock::Clock;
+use crate::worker::benchmarks::cache_size::run_cache_size_benchmark;
 use crate::worker::benchmarks::page_size::run_page_size_benchmark;
 use crate::worker::clock::start_clock_worker;
-use serde::{Deserialize, Serialize};
-use std::fmt::{Display, Formatter};
-use yew_agent::{HandlerId, Private, Worker, WorkerLink};
+
+mod benchmarks;
+mod clock;
 
 #[derive(Serialize, Deserialize, Copy, Clone)]
 pub enum BenchmarkType {
     PageSize,
+    CacheSize,
 }
 
 impl Display for BenchmarkType {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             BenchmarkType::PageSize => write!(f, "Page size"),
+            BenchmarkType::CacheSize => write!(f, "Cache size"),
         }
     }
 }
@@ -25,6 +30,7 @@ impl BenchmarkType {
     fn needs_clock(&self) -> bool {
         match self {
             BenchmarkType::PageSize => true,
+            BenchmarkType::CacheSize => true,
         }
     }
 }
@@ -84,5 +90,6 @@ impl Worker for BenchmarkWorker {
 fn run_benchmark(benchmark: BenchmarkType, clock: Option<Clock>) -> BenchmarkResult {
     match benchmark {
         BenchmarkType::PageSize => run_page_size_benchmark(clock.unwrap()),
+        BenchmarkType::CacheSize => run_cache_size_benchmark(clock.unwrap()),
     }
 }
