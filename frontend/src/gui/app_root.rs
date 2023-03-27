@@ -113,6 +113,7 @@ impl AppRoot {
         self.remaining_benchmarks = VecDeque::from(vec![
             // TODO: Add remaining benchmarks
             BenchmarkType::PageSize,
+            BenchmarkType::CacheSize,
         ]);
 
         // Start with first benchmark
