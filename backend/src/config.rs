@@ -4,7 +4,7 @@ use serde::Deserialize;
 use std::path::Path;
 
 const CONFIG_ENV_PREFIX: &str = "BACKEND";
-const CONFIG_FILE_PATH_DEFAULT: &str = "config/backend";
+const CONFIG_FILE_PATH_DEFAULT: &str = "config/backend.yml";
 
 #[allow(unused)]
 #[derive(Clone, Debug, Deserialize)]
@@ -31,12 +31,10 @@ pub fn read_config(custom_file_path: Option<&Path>) -> BackendConfig {
 
             if default_path.exists() {
                 info!("Using default configuration path");
-                config_builder =
-                    config_builder.add_source(config::File::from(default_path));
+                config_builder = config_builder.add_source(config::File::from(default_path));
             } else {
                 info!("No default configuration file detected - using only environment variables");
             }
-
         }
     }
 

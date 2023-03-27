@@ -1,55 +1,14 @@
-mod bridge;
-
-pub use bridge::*;
-
 use js_sys::{Atomics, BigInt64Array, SharedArrayBuffer};
 use wasm_bindgen::JsValue;
-use yew_agent::{Public, Worker, WorkerLink};
 
-pub struct ClockWorker {
-    link: WorkerLink<Self>,
-    clock: Clock,
-}
-
-impl Worker for ClockWorker {
-    type Reach = Public<Self>;
-
-    type Message = ();
-
-    type Input = ();
-
-    type Output = i64;
-
-    fn create(link: WorkerLink<Self>) -> Self {
-        ClockWorker {
-            link,
-            clock: Clock::new(),
-        }
-    }
-
-    fn update(&mut self, _msg: Self::Message) {}
-
-    fn handle_input(&mut self, _msg: Self::Input, id: yew_agent::HandlerId) {
-        let _ = self.clock.increment();
-        let output = self.clock.read().unwrap();
-        self.link.respond(id, output);
-    }
-
-    fn name_of_resource() -> &'static str {
-        "worker.js"
-    }
-}
-
-pub enum ClockMessage {
-    Start,
-    Count(i64),
-}
+pub const CLOCK_MESSAGE_READY: &str = "clock_ready";
+pub const CLOCK_MESSAGE_STARTED: &str = "clock_started";
 
 /// Clock implementation using SharedArrayBuffer. Based on
 /// [wasm-rs-shared-channel](https://docs.rs/wasm-rs-shared-channel/0.1.0/src/wasm_rs_shared_channel/spsc.rs.html#128-135)
 pub struct Clock {
-    shared_buffer: SharedArrayBuffer,
-    data: BigInt64Array,
+    pub shared_buffer: SharedArrayBuffer,
+    pub data: BigInt64Array,
 }
 
 impl Clock {
@@ -66,16 +25,26 @@ impl Clock {
     }
 
     #[inline(always)]
-    pub fn increment(&self) -> Result<(), JsValue> {
-        Atomics::add_bigint(&self.data, 0, 1)?;
-        Ok(())
+    pub fn increment(&self) -> Result<i64, JsValue> {
+        let value = Atomics::add_bigint(&self.data, 0, 1)?;
+        Ok(value)
     }
 
     #[inline(always)]
     pub fn read(&self) -> Result<i64, JsValue> {
         // Currently using add with zero, load_bigint seems to give a JS error.
-        let t = Atomics::add_bigint(&self.data, 0, 0)?;
-        Ok(t)
+        let value = Atomics::add_bigint(&self.data, 0, 0)?;
+        Ok(value)
+    }
+}
+
+impl From<SharedArrayBuffer> for Clock {
+    fn from(value: SharedArrayBuffer) -> Self {
+        let data = BigInt64Array::new(&value);
+        Clock {
+            shared_buffer: value,
+            data,
+        }
     }
 }
 

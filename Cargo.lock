@@ -657,9 +657,11 @@ name = "frontend"
 version = "0.1.0"
 dependencies = [
  "common",
+ "console_error_panic_hook",
  "getrandom",
  "gloo-console",
  "gloo-net",
+ "gloo-timers",
  "js-sys",
  "rand",
  "serde",
