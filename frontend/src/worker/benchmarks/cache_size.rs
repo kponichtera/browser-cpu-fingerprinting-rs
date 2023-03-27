@@ -23,7 +23,7 @@ pub fn run_cache_size_benchmark(clock: Clock) -> BenchmarkResult {
     let l1 = (10..150).step_by(2);
     let l2 = (150..2000).step_by(50);
     let l3 = (2000..25000).step_by(500);
-    let sizes = [l1].map(|l| l.collect::<Vec<_>>()).concat();
+    let sizes = [l1, l2, l3].map(|l| l.collect::<Vec<_>>()).concat();
 
     let mut rand = rand::thread_rng();
     let result: Vec<DataPoint> = sizes
