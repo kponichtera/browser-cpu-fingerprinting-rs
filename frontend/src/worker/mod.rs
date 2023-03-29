@@ -38,6 +38,8 @@ impl BenchmarkType {
 #[derive(Serialize, Deserialize)]
 pub struct BenchmarkInput {
     pub benchmark: BenchmarkType,
+    /// Origin of the webpage, required by the spawned workers to load the scripts
+    pub page_origin: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -69,7 +71,7 @@ impl Worker for BenchmarkWorker {
         if msg.benchmark.needs_clock() {
             let link = self.link.clone();
             // start the clock and run benchmark in the callback
-            start_clock_worker(move |clock, clock_worker| {
+            start_clock_worker(msg.page_origin, move |clock, clock_worker| {
                 let result = run_benchmark(msg.benchmark, Some(clock));
                 clock_worker.terminate();
                 link.respond(id, result);

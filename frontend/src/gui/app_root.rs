@@ -122,7 +122,10 @@ impl AppRoot {
             .pop_front()
             .expect("No benchmarks specified");
         self.status_label = benchmark.to_string();
-        self.bridge.send(BenchmarkInput { benchmark });
+        self.bridge.send(BenchmarkInput {
+            page_origin: get_page_origin(),
+            benchmark,
+        });
     }
 
     fn handle_benchmark_complete(&mut self, ctx: &Context<Self>, result: BenchmarkResult) {
@@ -133,7 +136,10 @@ impl AppRoot {
             Some(benchmark) => {
                 // Run next benchmark
                 self.status_label = benchmark.to_string();
-                self.bridge.send(BenchmarkInput { benchmark });
+                self.bridge.send(BenchmarkInput {
+                    page_origin: get_page_origin(),
+                    benchmark,
+                });
             }
             None => {
                 // No more benchmarks - send results to backend
@@ -196,6 +202,13 @@ fn get_user_agent() -> Option<String> {
         Ok(user_agent) => Some(user_agent),
         Err(_) => None,
     }
+}
+
+fn get_page_origin() -> String {
+    let window = web_sys::window().expect("Missing window");
+    window.location()
+        .origin()
+        .expect("Missing origin information")
 }
 
 /// TODO: For removal once benchmarks are fully handled by dedicated worker(s)

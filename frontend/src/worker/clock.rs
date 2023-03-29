@@ -7,19 +7,12 @@ use web_sys::{Blob, BlobPropertyBag, MessageEvent, Url, Worker};
 use crate::clock::{Clock, CLOCK_MESSAGE_READY, CLOCK_MESSAGE_STARTED};
 
 pub fn start_clock_worker<F: Fn(Clock, Worker) + 'static>(
+    page_origin: String,
     on_clock_started: F,
 ) -> Result<(), JsValue> {
-    // let origin = window()
-    //     .expect("window to be available")
-    //     .location()
-    //     .origin()
-    //     .expect("origin to be available");
-
-    // TODO: Figure out how to pass the origin (equivalent of http://127.0.0.1:9000),
-    //  probably by sending message to the invoking benchmark worker
     let script = Array::new();
     script.push(
-        &format!(r#"importScripts("http://127.0.0.1:9000/clock_worker.js");wasm_bindgen("http://127.0.0.1:9000/clock_worker_bg.wasm");"#)
+        &format!(r#"importScripts("{page_origin}/clock_worker.js");wasm_bindgen("{page_origin}/clock_worker_bg.wasm");"#)
             .into()
     );
 
@@ -62,17 +55,6 @@ pub fn start_clock_worker<F: Fn(Clock, Worker) + 'static>(
     }) as Box<dyn Fn(MessageEvent)>);
     worker.set_onmessage(Some(onmessage.as_ref().unchecked_ref()));
     onmessage.forget();
-
-    // (Busy) wait for the shared buffer to become non-zero,
-    // which means that clock worker started to do its job
-    // info!("Waiting for clock to start...");
-    // loop {
-    //     let clock_state = Atomics::add_bigint(&buffer_data, 0, 0)?;
-    //     if clock_state != 0 {
-    //         break;
-    //     }
-    // }
-    // info!("Clock is working");
 
     Ok(())
 }
