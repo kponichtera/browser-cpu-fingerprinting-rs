@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use yew_agent::{HandlerId, Private, Worker, WorkerLink};
 
 use crate::clock::Clock;
+use crate::worker::benchmarks::tlb_size::run_tlb_size_benchmark;
 use crate::worker::benchmarks::cache_size::run_cache_size_benchmark;
 use crate::worker::benchmarks::page_size::run_page_size_benchmark;
 use crate::worker::clock::start_clock_worker;
@@ -15,6 +16,7 @@ mod clock;
 pub enum BenchmarkType {
     PageSize,
     CacheSize,
+    TlbSize,
 }
 
 impl Display for BenchmarkType {
@@ -22,6 +24,7 @@ impl Display for BenchmarkType {
         match self {
             BenchmarkType::PageSize => write!(f, "Page size"),
             BenchmarkType::CacheSize => write!(f, "Cache size"),
+            BenchmarkType::TlbSize => write!(f, "TLB size"),
         }
     }
 }
@@ -31,6 +34,7 @@ impl BenchmarkType {
         match self {
             BenchmarkType::PageSize => true,
             BenchmarkType::CacheSize => true,
+            BenchmarkType::TlbSize => true,
         }
     }
 }
@@ -93,5 +97,6 @@ fn run_benchmark(benchmark: BenchmarkType, clock: Option<Clock>) -> BenchmarkRes
     match benchmark {
         BenchmarkType::PageSize => run_page_size_benchmark(clock.unwrap()),
         BenchmarkType::CacheSize => run_cache_size_benchmark(clock.unwrap()),
+        BenchmarkType::TlbSize => run_tlb_size_benchmark(clock.unwrap()),
     }
 }
