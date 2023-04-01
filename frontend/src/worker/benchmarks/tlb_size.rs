@@ -29,7 +29,7 @@ pub fn run_tlb_size_benchmark(clock: Clock) -> BenchmarkResult {
             let mut indices = (0..s).collect::<Vec<_>>();
             indices.shuffle(&mut rand);
 
-            indices[1..].windows(2).for_each(|w| list[w[0]] = w[1]);
+            indices.windows(2).for_each(|w| list[w[0]] = w[1]);
             list[indices[s - 1]] = indices[0];
             
             let mut p = 0;
