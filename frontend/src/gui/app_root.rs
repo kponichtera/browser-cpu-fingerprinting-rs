@@ -114,6 +114,7 @@ impl AppRoot {
             // TODO: Add remaining benchmarks
             BenchmarkType::PageSize,
             BenchmarkType::CacheSize,
+            BenchmarkType::TlbSize,
             BenchmarkType::SinglePerformance,
             BenchmarkType::CacheAssociativity,
         ]);
