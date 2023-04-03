@@ -115,6 +115,8 @@ impl AppRoot {
             BenchmarkType::PageSize,
             BenchmarkType::CacheSize,
             BenchmarkType::TlbSize,
+            BenchmarkType::SinglePerformance,
+            BenchmarkType::CacheAssociativity,
         ]);
 
         // Start with first benchmark
