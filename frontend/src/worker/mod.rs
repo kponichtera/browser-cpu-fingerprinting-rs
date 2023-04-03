@@ -5,6 +5,7 @@ use yew_agent::{HandlerId, Private, Worker, WorkerLink};
 
 use crate::clock::Clock;
 use crate::worker::benchmarks::single_performance::run_single_performance_benchmark;
+use crate::worker::benchmarks::cache_associativity::run_cache_associativity_benchmark;
 use crate::worker::benchmarks::cache_size::run_cache_size_benchmark;
 use crate::worker::benchmarks::page_size::run_page_size_benchmark;
 use crate::worker::clock::start_clock_worker;
@@ -17,6 +18,7 @@ pub enum BenchmarkType {
     PageSize,
     CacheSize,
     SinglePerformance,
+    CacheAssociativity,
 }
 
 impl Display for BenchmarkType {
@@ -25,6 +27,7 @@ impl Display for BenchmarkType {
             BenchmarkType::PageSize => write!(f, "Page size"),
             BenchmarkType::CacheSize => write!(f, "Cache size"),
             BenchmarkType::SinglePerformance => write!(f, "Single Performance"),
+            BenchmarkType::CacheAssociativity => write!(f, "Cache associativity"),
         }
     }
 }
@@ -35,6 +38,7 @@ impl BenchmarkType {
             BenchmarkType::PageSize => true,
             BenchmarkType::CacheSize => true,
             BenchmarkType::SinglePerformance => true,
+            BenchmarkType::CacheAssociativity => true,
         }
     }
 }
@@ -42,6 +46,8 @@ impl BenchmarkType {
 #[derive(Serialize, Deserialize)]
 pub struct BenchmarkInput {
     pub benchmark: BenchmarkType,
+    /// Origin of the webpage, required by the spawned workers to load the scripts
+    pub page_origin: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -73,7 +79,7 @@ impl Worker for BenchmarkWorker {
         if msg.benchmark.needs_clock() {
             let link = self.link.clone();
             // start the clock and run benchmark in the callback
-            start_clock_worker(move |clock, clock_worker| {
+            start_clock_worker(msg.page_origin, move |clock, clock_worker| {
                 let result = run_benchmark(msg.benchmark, Some(clock));
                 clock_worker.terminate();
                 link.respond(id, result);
@@ -96,5 +102,6 @@ fn run_benchmark(benchmark: BenchmarkType, clock: Option<Clock>) -> BenchmarkRes
         BenchmarkType::PageSize => run_page_size_benchmark(clock.unwrap()),
         BenchmarkType::CacheSize => run_cache_size_benchmark(clock.unwrap()),
         BenchmarkType::SinglePerformance => run_single_performance_benchmark(clock.unwrap()),
+        BenchmarkType::CacheAssociativity => run_cache_associativity_benchmark(clock.unwrap()),
     }
 }
