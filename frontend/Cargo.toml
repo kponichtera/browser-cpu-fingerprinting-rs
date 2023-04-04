@@ -19,3 +19,12 @@ rand = "0.8.5"
 getrandom = { version = "0.2", features = ["js"] }
 serde = "1.0"
 gloo-timers = "0.2"
+
+[profile.release]
+overflow-checks = false
+debug = 0
+strip = true
+debug-assertions = false
+panic = "abort"
+codegen-units = 1
+lto = true
