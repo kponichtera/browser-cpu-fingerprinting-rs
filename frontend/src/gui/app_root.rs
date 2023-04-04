@@ -301,25 +301,75 @@ impl Component for AppRoot {
                             </AccordionCollapse>
                         </AccordionItem>
                     </Accordion>
-                    <input
-                        id="model"
-                        value={self.model_input.clone()}
-                        oninput={ctx.link().callback(|e: InputEvent| {
-                            let input: HtmlInputElement = e.target_unchecked_into();
-                            AppRootMessage::ChangeModel(input.value())
-                        })}
-                        disabled={self.input_disabled}
-                    />
-                    <button
-                        onclick={ctx.link().callback(|_| { AppRootMessage::StartBenchmarks })}
-                        disabled={button_disabled}
-                    >
-                        { "Run tests" }
-                    </button>
+                    <div style="padding-left: 2rem; padding-right: 2rem; padding-top: 2rem">
+                        <label for="model" class="form-label">
+                            <strong>{ "CPU model" }</strong>
+                        </label>
+                        <input
+                            id="model"
+                            name="model"
+                            type="text"
+                            placeholder="Please enter your CPU model here"
+                            aria-label="CPU model"
+                            class="form-control"
+                            value={self.model_input.clone()}
+                            oninput={ctx.link().callback(|e: InputEvent| {
+                                let input: HtmlInputElement = e.target_unchecked_into();
+                                AppRootMessage::ChangeModel(input.value())
+                            })}
+                            disabled={self.input_disabled}
+                            required=true
+                        />
+                    </div>
+                    <h5 style="padding-left: 2rem; padding-right: 2rem; padding-top: 3rem">
+                        { "Step 2 - Running our benchmarks." }
+                    </h5>
+                    <p style="padding-left: 2rem; padding-right: 2rem">
+                        {"Please do "}
+                        <strong>{"not"}</strong>
+                        {" do anything else on your computer while running our benchmarks. To ensure that you leave the tab open, you will have to press the button at the bottom at least every 30 seconds. Press the START-button to start."}
+                    </p>
+                    <div style="display: flex; justify-content: center; margin: 3rem">
+                        <button
+                            id="startButton"
+                            class="btn btn-primary btn-lg"
+                            style="width: 6.5rem"
+                            type="button"
+                            onclick={ctx.link().callback(|_| { AppRootMessage::StartBenchmarks })}
+                            disabled={button_disabled}
+                        >
+                            { "Run tests" }
+                        </button>
+                    </div>
+                    <Container>
+                        <Container size={ContainerSize::Large}>
+                            <p style="text-align: center">{ "Total progress:" }</p>
+                            <div class="progress">
+                                <div id="totalBar" class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </Container>
+                    </Container>
+                    <Container>
+                        <Container size={ContainerSize::Large}>
+                            <p style="text-align: center">{ "Current benchmark:" }</p>
+                            <div class="progress">
+                                <div id="mainBar" class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </Container>
+                    </Container>
                     <p>{self.status_label.clone()}</p>
                 </Container>
             </Container>
+            <Container size={ContainerSize::Large}>
+                <div style="padding-top: 8rem">
+                </div>
+            </Container>
             {include_cdn_js()}
+            <footer class="text-center text-white fixed-bottom bg-dark">
+                <div class="text-center p-3">
+                    <p>{" Hacking Lab team @ TUDelft 2023 "}</p>
+                </div>
+            </footer>
         </>
         }
     }
