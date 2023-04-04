@@ -1,14 +1,16 @@
-use common::dto::result::ResultDTO;
 use std::collections::VecDeque;
 use std::ops::Deref;
 use std::rc::Rc;
 
-use crate::profilers::Profiler;
 use gloo_net::http::Request;
 use serde_json::value::Value;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 use yew_agent::{Bridge, Bridged};
+use yew_bootstrap::component::*;
+use yew_bootstrap::util::*;
+
+use common::dto::result::ResultDTO;
 
 use crate::profilers::cache_associativity::*;
 use crate::profilers::cache_size::*;
@@ -17,6 +19,7 @@ use crate::profilers::memory_latencies::*;
 use crate::profilers::multi_core_performance::*;
 use crate::profilers::page_size::*;
 use crate::profilers::prefetcher::*;
+use crate::profilers::Profiler;
 use crate::profilers::single_core_performance::*;
 use crate::profilers::timer_precision::*;
 use crate::profilers::tlb_size::*;
@@ -39,6 +42,88 @@ pub struct AppRoot {
 
     benchmark_results: Vec<BenchmarkResult>,
     remaining_benchmarks: VecDeque<BenchmarkType>,
+}
+
+
+// all of these these should ideally be moved somewhere else
+#[derive(PartialEq, Properties)]
+struct AccordionProps {
+    style: Option<String>,
+    id: Option<String>,
+    children: Children,
+}
+
+#[function_component]
+fn Accordion(props: &AccordionProps) -> Html {
+    html! {
+        <div class="accordion" style={props.style.clone()} id={props.id.clone()}>
+            { props.children.clone() }
+        </div>
+    }
+}
+
+#[function_component]
+fn AccordionItem(props: &AccordionProps) -> Html {
+    html! {
+        <div class="accordion-item" style={props.style.clone()} id={props.id.clone()}>
+            { props.children.clone() }
+        </div>
+    }
+}
+
+#[derive(PartialEq, Properties)]
+struct AccordionButtonProps {
+    style: Option<String>,
+    id: Option<String>,
+    children: Children,
+    data_bs_target: String,
+}
+
+#[function_component]
+fn AccordionButton(props: &AccordionButtonProps) -> Html {
+    html! {
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target={props.data_bs_target.clone()} aria-expanded="false" aria-controls={props.id.clone()}>
+            { props.children.clone() }
+        </button>
+    }
+}
+
+#[derive(PartialEq, Properties)]
+struct AccordionHeaderProps {
+    style: Option<String>,
+    id: Option<String>,
+    children: Children,
+    data_bs_target: String,
+}
+
+#[function_component]
+fn AccordionHeader(props: &AccordionHeaderProps) -> Html {
+    html! {
+        <h2 class="accordion-header" style={props.style.clone()} id={props.id.clone()}>
+            <AccordionButton id={props.id.clone()} style={props.style.clone()} data_bs_target={props.data_bs_target.clone()}>
+                { props.children.clone() }
+            </AccordionButton>
+        </h2>
+    }
+}
+
+#[derive(PartialEq, Properties)]
+struct AccordionCollapseProps {
+    style: Option<String>,
+    id: Option<String>,
+    children: Children,
+    data_bs_parent: String,
+}
+
+#[function_component]
+fn AccordionCollapse(props: &AccordionCollapseProps) -> Html {
+    html! {
+        <div class="accordion-collapse collapse" id={props.id.clone()} aria-labelledby={props.id.clone()} data-bs-parent={props.data_bs_parent.clone()}>
+            <div class="accordion-body">
+                { props.children.clone() }
+            </div>
+        </div>
+    }
 }
 
 impl Component for AppRoot {
@@ -82,24 +167,160 @@ impl Component for AppRoot {
         }
     }
 
+
     fn view(&self, ctx: &Context<Self>) -> Html {
         let button_disabled = self.button_disabled || self.model_input.is_empty();
 
         html! {
-            <main>
-                <input id="model"
-                    value={self.model_input.clone()}
-                    oninput={ctx.link().callback(|e: InputEvent| {
-                                let input: HtmlInputElement = e.target_unchecked_into();
-                                AppRootMessage::ChangeModel(input.value())
-                            })}
-                    disabled={self.input_disabled}/>
-                <button onclick={ctx.link().callback(|_| { AppRootMessage::StartBenchmarks })}
-                        disabled={button_disabled}>
-                    { "Run tests" }
-                </button>
-                <p>{self.status_label.clone()}</p>
-            </main>
+        <>
+            {include_cdn()}
+            <Container>
+                <Container size={ContainerSize::Large}>
+                    <h1 style={"text-align: center"}>
+                        { "RUST WASM CPU fingerprinting" }
+                    </h1>
+                    <p style={"margin: 2rem"}>
+                        { "This site will run a few JavaScript benchmarks to gather information about your CPU. This results of these benchmarks will then be uploaded to our server, where they are then stored in a database. Please click " }
+                        <code>{ "Continue" }</code>
+                        { " and follow the short instructions on the next page. For more information check out the FAQ at the bottom." }
+                    </p>
+                    <p style="padding-left: 2rem; padding-right: 2rem">
+                        { "Our benchmarks are designed for the latest versions of " }
+                        <strong>{ "Firefox" }</strong>
+                        { " and " }
+                        <strong>{ "Chrome" }</strong>
+                        { "-based browsers (e.g. Google Chrome, Chromium, Microsoft Edge etc.). Most importantly Safari and iOS devices are not supported." }
+                    </p>
+                    <h5 style="padding-left: 2rem; padding-right: 2rem; padding-top: 3rem">
+                        { "Step 1 - Determining your CPU model." }
+                    </h5>
+                    <p style="padding-left: 2rem; padding-right: 2rem">
+                        { "Please fill out the text field below with your CPU model. To keep our database consistent please use the following method to determine your CPU model." }
+                    </p>
+                    <Accordion style="padding-left: 2rem; padding-right: 2rem" id="modelMethodsAccordion">
+                        <AccordionItem>
+                            <AccordionHeader id="headingOne" data_bs_target="#collapseOne">
+                                { "Windows" }
+                            </AccordionHeader>
+                            <AccordionCollapse data_bs_parent="#modelMethodsAccordion" id="collapseOne">
+                                <ol>
+                                    <li>
+                                        { "Press "}
+                                        <kbd>{ "win" }</kbd>
+                                        { " + " }
+                                        <kbd>{ "r" }</kbd>
+                                        { ". This should open a small window in the lower left corner." }
+                                    </li>
+                                    <li>
+                                        { "Type " }
+                                        <code>{ "cmd.exe" }</code>
+                                        { " and hit "}
+                                        <kbd>{ "Enter" }</kbd>
+                                        { ". This should open a command prompt." }
+                                    </li>
+                                    <li>
+                                        { "Type " }
+                                        <code>{ "wmic cpu get name" }</code>
+                                        { "in the prompt and hit" }
+                                        <kbd>{ "Enter" }</kbd>
+                                        { ". The output should look something like this." }
+                                        <code>
+                                            <p>{ "Name" }</p>
+                                            <p style="margin-top: -1rem">
+                                                { "Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz" }
+                                            </p>
+                                        </code>
+                                    </li>
+                                    <li>
+                                        { "Your CPU model is the second line of the output. In this case: " }
+                                        <code>{ "Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz" }</code>
+                                    </li>
+                                </ol>
+                            </AccordionCollapse>
+                        </AccordionItem>
+                        <AccordionItem>
+                            <AccordionHeader id="headingTwo" data_bs_target="#collapseTwo">
+                                { "Linux" }
+                            </AccordionHeader>
+                            <AccordionCollapse data_bs_parent="#modelMethodsAccordion" id="collapseTwo">
+                                <ol>
+                                    <li>{"Open a terminal."}</li>
+                                    <li>
+                                        {"Type "}
+                                        <code>{"grep 'model name' /proc/cpuinfo | uniq"}</code>
+                                        {" and hit "}
+                                        <kbd>{"Enter"}</kbd>
+                                        {"."}
+                                        {" The output should look something like this:"}
+                                        <code>
+                                            <p>{"model name: Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz"}</p>
+                                        </code>
+                                    </li>
+                                    <li>
+                                        {"Your CPU model is the second part of the output. In this case: "}
+                                        <code>{" Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz "}</code>
+                                    </li>
+                                </ol>
+                            </AccordionCollapse>
+                        </AccordionItem>
+                        <AccordionItem>
+                            <AccordionHeader id="headingThree" data_bs_target="#collapseThree">
+                                { "MacOS" }
+                            </AccordionHeader>
+                            <AccordionCollapse data_bs_parent="#modelMethodsAccordion" id="collapseThree">
+                                <ol>
+                                    <li>{"Open a terminal."}</li>
+                                    <li>
+                                        {"Type "}
+                                        <code>{"sysctl machdep.cpu.brand_string"}</code>
+                                        {" and hit "}
+                                        <kbd>{"Enter"}</kbd>
+                                        {"."}
+                                        {" The output should look something like this:"}
+                                        <code>
+                                            <p>
+                                                {"machdep.cpu.brand_string: Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz"}
+                                            </p>
+                                        </code>
+                                    </li>
+                                    <li>
+                                        {"Your CPU model is the second part of the output. In this case: "}
+                                        <code>{" Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz "}</code>
+                                    </li>
+                                </ol>
+                            </AccordionCollapse>
+                        </AccordionItem>
+                        <AccordionItem>
+                            <AccordionHeader id="headingFour" data_bs_target="#collapseFour">
+                                { "Android" }
+                            </AccordionHeader>
+                            <AccordionCollapse data_bs_parent="#modelMethodsAccordion" id="collapseFour">
+                                { "Unfortunately, there is no direct way of determining your CPU model on
+                                Android. Please use your favorite search engine to determine your CPU
+                                model or simply state the name of your mobile device." }
+                            </AccordionCollapse>
+                        </AccordionItem>
+                    </Accordion>
+                    <input
+                        id="model"
+                        value={self.model_input.clone()}
+                        oninput={ctx.link().callback(|e: InputEvent| {
+                            let input: HtmlInputElement = e.target_unchecked_into();
+                            AppRootMessage::ChangeModel(input.value())
+                        })}
+                        disabled={self.input_disabled}
+                    />
+                    <button
+                        onclick={ctx.link().callback(|_| { AppRootMessage::StartBenchmarks })}
+                        disabled={button_disabled}
+                    >
+                        { "Run tests" }
+                    </button>
+                    <p>{self.status_label.clone()}</p>
+                </Container>
+            </Container>
+            {include_cdn_js()}
+        </>
         }
     }
 }
@@ -200,8 +421,8 @@ fn get_user_agent() -> Option<String> {
 
 /// TODO: For removal once benchmarks are fully handled by dedicated worker(s)
 fn run_profilers<T>(profiler_prehook: T) -> (Vec<Value>, Vec<f32>)
-where
-    T: FnOnce(&dyn Profiler) + Copy,
+    where
+        T: FnOnce(&dyn Profiler) + Copy,
 {
     let profilers: Vec<Box<dyn Profiler>> = vec![
         Box::new(PageSizeProfiler {}),

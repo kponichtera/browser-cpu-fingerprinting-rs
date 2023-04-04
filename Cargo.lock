@@ -671,6 +671,7 @@ dependencies = [
  "web-sys",
  "yew",
  "yew-agent",
+ "yew-bootstrap",
 ]
 
 [[package]]
@@ -2522,6 +2523,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b06f7c5ed97fff22816bb00d3d82ebc0fc1119d7bbb9e07e62c0d2853f51920a"
 dependencies = [
  "gloo-worker 0.1.2",
+ "yew",
+]
+
+[[package]]
+name = "yew-bootstrap"
+version = "0.5.13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d7688970f76695185c54e8bfee2d597c6834040b26c8cbc99d35359e35d04477"
+dependencies = [
+ "log",
  "yew",
 ]
 
