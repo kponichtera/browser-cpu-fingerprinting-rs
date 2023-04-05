@@ -10,7 +10,7 @@ use yew_bootstrap::util::*;
 
 use common::dto::result::ResultDTO;
 
-use crate::gui::renders::*;
+use crate::gui::renderers::*;
 use crate::profilers::cache_associativity::*;
 use crate::profilers::cache_size::*;
 use crate::profilers::load_buffer_size::*;
