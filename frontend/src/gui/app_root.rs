@@ -1,15 +1,16 @@
-use common::dto::result::ResultDTO;
 use std::collections::VecDeque;
 use std::ops::Deref;
 use std::rc::Rc;
 
-use crate::profilers::Profiler;
 use gloo_net::http::Request;
 use serde_json::value::Value;
-use web_sys::HtmlInputElement;
 use yew::prelude::*;
 use yew_agent::{Bridge, Bridged};
+use yew_bootstrap::util::*;
 
+use common::dto::result::ResultDTO;
+
+use crate::gui::renderers::*;
 use crate::profilers::cache_associativity::*;
 use crate::profilers::cache_size::*;
 use crate::profilers::load_buffer_size::*;
@@ -17,6 +18,7 @@ use crate::profilers::memory_latencies::*;
 use crate::profilers::multi_core_performance::*;
 use crate::profilers::page_size::*;
 use crate::profilers::prefetcher::*;
+use crate::profilers::Profiler;
 use crate::profilers::single_core_performance::*;
 use crate::profilers::timer_precision::*;
 use crate::profilers::tlb_size::*;
@@ -36,6 +38,9 @@ pub struct AppRoot {
     status_label: String,
     button_disabled: bool,
     input_disabled: bool,
+    total_benchmarks: usize,
+    finished_benchmarks: usize,
+    current_progress: f32,
 
     benchmark_results: Vec<BenchmarkResult>,
     remaining_benchmarks: VecDeque<BenchmarkType>,
@@ -58,6 +63,9 @@ impl Component for AppRoot {
             input_disabled: false,
             benchmark_results: Vec::new(),
             remaining_benchmarks: VecDeque::new(),
+            total_benchmarks: 0,
+            finished_benchmarks: 0,
+            current_progress: 0.0,
         }
     }
 
@@ -86,30 +94,38 @@ impl Component for AppRoot {
         let button_disabled = self.button_disabled || self.model_input.is_empty();
 
         html! {
-            <main>
-                <input id="model"
-                    value={self.model_input.clone()}
-                    oninput={ctx.link().callback(|e: InputEvent| {
-                                let input: HtmlInputElement = e.target_unchecked_into();
-                                AppRootMessage::ChangeModel(input.value())
-                            })}
-                    disabled={self.input_disabled}/>
-                <button onclick={ctx.link().callback(|_| { AppRootMessage::StartBenchmarks })}
-                        disabled={button_disabled}>
-                    { "Run tests" }
-                </button>
-                <p>{self.status_label.clone()}</p>
-            </main>
+        <>
+            {include_cdn()}
+            {render_main_container(
+                &self.model_input,
+                self.input_disabled,
+                &ctx,
+                button_disabled,
+                self.current_progress,
+                &self.status_label,
+            )}
+            {include_cdn_js()}
+            {render_footer()}
+        </>
         }
     }
 }
 
 impl AppRoot {
     fn start_benchmarks(&mut self) {
+        self.disable_controls();
+        self.initialize_benchmark_data();
+
+        self.start_next_benchmark_or_send(None);
+    }
+
+    fn disable_controls(&mut self) {
         self.button_disabled = true;
         self.input_disabled = true;
-        self.benchmark_results = vec![];
+    }
 
+    fn initialize_benchmark_data(&mut self) {
+        self.benchmark_results = vec![];
         self.remaining_benchmarks = VecDeque::from(vec![
             // TODO: Add remaining benchmarks
             BenchmarkType::PageSize,
@@ -119,36 +135,30 @@ impl AppRoot {
             BenchmarkType::CacheAssociativity,
         ]);
 
-        // Start with first benchmark
-        let benchmark = self
-            .remaining_benchmarks
-            .pop_front()
-            .expect("No benchmarks specified");
+        self.total_benchmarks = self.remaining_benchmarks.len();
+    }
+
+    fn start_next_benchmark_or_send(&mut self, ctx: Option<&Context<Self>>) {
+        if let Some(benchmark) = self.remaining_benchmarks.pop_front() {
+            self.update_status_and_progress(benchmark);
+            self.bridge.send(BenchmarkInput {
+                page_origin: get_page_origin(),
+                benchmark,
+            });
+        } else if let Some(ctx) = ctx {
+            self.send_result(ctx);
+        }
+    }
+
+    fn update_status_and_progress(&mut self, benchmark: BenchmarkType) {
         self.status_label = benchmark.to_string();
-        self.bridge.send(BenchmarkInput {
-            page_origin: get_page_origin(),
-            benchmark,
-        });
+        self.finished_benchmarks += 1;
+        self.current_progress = self.finished_benchmarks as f32 / self.total_benchmarks as f32 * 100.0;
     }
 
     fn handle_benchmark_complete(&mut self, ctx: &Context<Self>, result: BenchmarkResult) {
         self.benchmark_results.push(result);
-
-        let next_benchmark = self.remaining_benchmarks.pop_front();
-        match next_benchmark {
-            Some(benchmark) => {
-                // Run next benchmark
-                self.status_label = benchmark.to_string();
-                self.bridge.send(BenchmarkInput {
-                    page_origin: get_page_origin(),
-                    benchmark,
-                });
-            }
-            None => {
-                // No more benchmarks - send results to backend
-                self.send_result(ctx);
-            }
-        }
+        self.start_next_benchmark_or_send(Some(ctx));
     }
 
     fn send_result(&self, ctx: &Context<Self>) {
