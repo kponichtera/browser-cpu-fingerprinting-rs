@@ -4,14 +4,13 @@ use std::rc::Rc;
 
 use gloo_net::http::Request;
 use serde_json::value::Value;
-use web_sys::HtmlInputElement;
 use yew::prelude::*;
 use yew_agent::{Bridge, Bridged};
-use yew_bootstrap::component::*;
 use yew_bootstrap::util::*;
 
 use common::dto::result::ResultDTO;
 
+use crate::gui::renders::*;
 use crate::profilers::cache_associativity::*;
 use crate::profilers::cache_size::*;
 use crate::profilers::load_buffer_size::*;
@@ -39,91 +38,12 @@ pub struct AppRoot {
     status_label: String,
     button_disabled: bool,
     input_disabled: bool,
+    total_benchmarks: usize,
+    finished_benchmarks: usize,
+    current_progress: f32,
 
     benchmark_results: Vec<BenchmarkResult>,
     remaining_benchmarks: VecDeque<BenchmarkType>,
-}
-
-
-// all of these these should ideally be moved somewhere else
-#[derive(PartialEq, Properties)]
-struct AccordionProps {
-    style: Option<String>,
-    id: Option<String>,
-    children: Children,
-}
-
-#[function_component]
-fn Accordion(props: &AccordionProps) -> Html {
-    html! {
-        <div class="accordion" style={props.style.clone()} id={props.id.clone()}>
-            { props.children.clone() }
-        </div>
-    }
-}
-
-#[function_component]
-fn AccordionItem(props: &AccordionProps) -> Html {
-    html! {
-        <div class="accordion-item" style={props.style.clone()} id={props.id.clone()}>
-            { props.children.clone() }
-        </div>
-    }
-}
-
-#[derive(PartialEq, Properties)]
-struct AccordionButtonProps {
-    style: Option<String>,
-    id: Option<String>,
-    children: Children,
-    data_bs_target: String,
-}
-
-#[function_component]
-fn AccordionButton(props: &AccordionButtonProps) -> Html {
-    html! {
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target={props.data_bs_target.clone()} aria-expanded="false" aria-controls={props.id.clone()}>
-            { props.children.clone() }
-        </button>
-    }
-}
-
-#[derive(PartialEq, Properties)]
-struct AccordionHeaderProps {
-    style: Option<String>,
-    id: Option<String>,
-    children: Children,
-    data_bs_target: String,
-}
-
-#[function_component]
-fn AccordionHeader(props: &AccordionHeaderProps) -> Html {
-    html! {
-        <h2 class="accordion-header" style={props.style.clone()} id={props.id.clone()}>
-            <AccordionButton id={props.id.clone()} style={props.style.clone()} data_bs_target={props.data_bs_target.clone()}>
-                { props.children.clone() }
-            </AccordionButton>
-        </h2>
-    }
-}
-
-#[derive(PartialEq, Properties)]
-struct AccordionCollapseProps {
-    style: Option<String>,
-    id: Option<String>,
-    children: Children,
-    data_bs_parent: String,
-}
-
-#[function_component]
-fn AccordionCollapse(props: &AccordionCollapseProps) -> Html {
-    html! {
-        <div class="accordion-collapse collapse" id={props.id.clone()} aria-labelledby={props.id.clone()} data-bs-parent={props.data_bs_parent.clone()}>
-            <div class="accordion-body">
-                { props.children.clone() }
-            </div>
-        </div>
-    }
 }
 
 impl Component for AppRoot {
@@ -143,6 +63,9 @@ impl Component for AppRoot {
             input_disabled: false,
             benchmark_results: Vec::new(),
             remaining_benchmarks: VecDeque::new(),
+            total_benchmarks: 0,
+            finished_benchmarks: 0,
+            current_progress: 0.0,
         }
     }
 
@@ -167,209 +90,22 @@ impl Component for AppRoot {
         }
     }
 
-
     fn view(&self, ctx: &Context<Self>) -> Html {
         let button_disabled = self.button_disabled || self.model_input.is_empty();
 
         html! {
         <>
             {include_cdn()}
-            <Container>
-                <Container size={ContainerSize::Large}>
-                    <h1 style={"text-align: center"}>
-                        { "RUST WASM CPU fingerprinting" }
-                    </h1>
-                    <p style={"margin: 2rem"}>
-                        { "This site will run a few JavaScript benchmarks to gather information about your CPU. This results of these benchmarks will then be uploaded to our server, where they are then stored in a database. Please click " }
-                        <code>{ "Continue" }</code>
-                        { " and follow the short instructions on the next page. For more information check out the FAQ at the bottom." }
-                    </p>
-                    <p style="padding-left: 2rem; padding-right: 2rem">
-                        { "Our benchmarks are designed for the latest versions of " }
-                        <strong>{ "Firefox" }</strong>
-                        { " and " }
-                        <strong>{ "Chrome" }</strong>
-                        { "-based browsers (e.g. Google Chrome, Chromium, Microsoft Edge etc.). Most importantly Safari and iOS devices are not supported." }
-                    </p>
-                    <h5 style="padding-left: 2rem; padding-right: 2rem; padding-top: 3rem">
-                        { "Step 1 - Determining your CPU model." }
-                    </h5>
-                    <p style="padding-left: 2rem; padding-right: 2rem">
-                        { "Please fill out the text field below with your CPU model. To keep our database consistent please use the following method to determine your CPU model." }
-                    </p>
-                    <Accordion style="padding-left: 2rem; padding-right: 2rem" id="modelMethodsAccordion">
-                        <AccordionItem>
-                            <AccordionHeader id="headingOne" data_bs_target="#collapseOne">
-                                { "Windows" }
-                            </AccordionHeader>
-                            <AccordionCollapse data_bs_parent="#modelMethodsAccordion" id="collapseOne">
-                                <ol>
-                                    <li>
-                                        { "Press "}
-                                        <kbd>{ "win" }</kbd>
-                                        { " + " }
-                                        <kbd>{ "r" }</kbd>
-                                        { ". This should open a small window in the lower left corner." }
-                                    </li>
-                                    <li>
-                                        { "Type " }
-                                        <code>{ "cmd.exe" }</code>
-                                        { " and hit "}
-                                        <kbd>{ "Enter" }</kbd>
-                                        { ". This should open a command prompt." }
-                                    </li>
-                                    <li>
-                                        { "Type " }
-                                        <code>{ "wmic cpu get name" }</code>
-                                        { "in the prompt and hit" }
-                                        <kbd>{ "Enter" }</kbd>
-                                        { ". The output should look something like this." }
-                                        <code>
-                                            <p>{ "Name" }</p>
-                                            <p style="margin-top: -1rem">
-                                                { "Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz" }
-                                            </p>
-                                        </code>
-                                    </li>
-                                    <li>
-                                        { "Your CPU model is the second line of the output. In this case: " }
-                                        <code>{ "Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz" }</code>
-                                    </li>
-                                </ol>
-                            </AccordionCollapse>
-                        </AccordionItem>
-                        <AccordionItem>
-                            <AccordionHeader id="headingTwo" data_bs_target="#collapseTwo">
-                                { "Linux" }
-                            </AccordionHeader>
-                            <AccordionCollapse data_bs_parent="#modelMethodsAccordion" id="collapseTwo">
-                                <ol>
-                                    <li>{"Open a terminal."}</li>
-                                    <li>
-                                        {"Type "}
-                                        <code>{"grep 'model name' /proc/cpuinfo | uniq"}</code>
-                                        {" and hit "}
-                                        <kbd>{"Enter"}</kbd>
-                                        {"."}
-                                        {" The output should look something like this:"}
-                                        <code>
-                                            <p>{"model name: Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz"}</p>
-                                        </code>
-                                    </li>
-                                    <li>
-                                        {"Your CPU model is the second part of the output. In this case: "}
-                                        <code>{" Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz "}</code>
-                                    </li>
-                                </ol>
-                            </AccordionCollapse>
-                        </AccordionItem>
-                        <AccordionItem>
-                            <AccordionHeader id="headingThree" data_bs_target="#collapseThree">
-                                { "MacOS" }
-                            </AccordionHeader>
-                            <AccordionCollapse data_bs_parent="#modelMethodsAccordion" id="collapseThree">
-                                <ol>
-                                    <li>{"Open a terminal."}</li>
-                                    <li>
-                                        {"Type "}
-                                        <code>{"sysctl machdep.cpu.brand_string"}</code>
-                                        {" and hit "}
-                                        <kbd>{"Enter"}</kbd>
-                                        {"."}
-                                        {" The output should look something like this:"}
-                                        <code>
-                                            <p>
-                                                {"machdep.cpu.brand_string: Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz"}
-                                            </p>
-                                        </code>
-                                    </li>
-                                    <li>
-                                        {"Your CPU model is the second part of the output. In this case: "}
-                                        <code>{" Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz "}</code>
-                                    </li>
-                                </ol>
-                            </AccordionCollapse>
-                        </AccordionItem>
-                        <AccordionItem>
-                            <AccordionHeader id="headingFour" data_bs_target="#collapseFour">
-                                { "Android" }
-                            </AccordionHeader>
-                            <AccordionCollapse data_bs_parent="#modelMethodsAccordion" id="collapseFour">
-                                { "Unfortunately, there is no direct way of determining your CPU model on
-                                Android. Please use your favorite search engine to determine your CPU
-                                model or simply state the name of your mobile device." }
-                            </AccordionCollapse>
-                        </AccordionItem>
-                    </Accordion>
-                    <div style="padding-left: 2rem; padding-right: 2rem; padding-top: 2rem">
-                        <label for="model" class="form-label">
-                            <strong>{ "CPU model" }</strong>
-                        </label>
-                        <input
-                            id="model"
-                            name="model"
-                            type="text"
-                            placeholder="Please enter your CPU model here"
-                            aria-label="CPU model"
-                            class="form-control"
-                            value={self.model_input.clone()}
-                            oninput={ctx.link().callback(|e: InputEvent| {
-                                let input: HtmlInputElement = e.target_unchecked_into();
-                                AppRootMessage::ChangeModel(input.value())
-                            })}
-                            disabled={self.input_disabled}
-                            required=true
-                        />
-                    </div>
-                    <h5 style="padding-left: 2rem; padding-right: 2rem; padding-top: 3rem">
-                        { "Step 2 - Running our benchmarks." }
-                    </h5>
-                    <p style="padding-left: 2rem; padding-right: 2rem">
-                        {"Please do "}
-                        <strong>{"not"}</strong>
-                        {" do anything else on your computer while running our benchmarks. To ensure that you leave the tab open, you will have to press the button at the bottom at least every 30 seconds. Press the START-button to start."}
-                    </p>
-                    <div style="display: flex; justify-content: center; margin: 3rem">
-                        <button
-                            id="startButton"
-                            class="btn btn-primary btn-lg"
-                            style="width: 6.5rem"
-                            type="button"
-                            onclick={ctx.link().callback(|_| { AppRootMessage::StartBenchmarks })}
-                            disabled={button_disabled}
-                        >
-                            { "Run tests" }
-                        </button>
-                    </div>
-                    <Container>
-                        <Container size={ContainerSize::Large}>
-                            <p style="text-align: center">{ "Total progress:" }</p>
-                            <div class="progress">
-                                <div id="totalBar" class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                        </Container>
-                    </Container>
-                    <Container>
-                        <Container size={ContainerSize::Large}>
-                            <p style="text-align: center">{ "Current benchmark:" }</p>
-                            <div class="progress">
-                                <div id="mainBar" class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                        </Container>
-                    </Container>
-                    <p>{self.status_label.clone()}</p>
-                </Container>
-            </Container>
-            <Container size={ContainerSize::Large}>
-                <div style="padding-top: 8rem">
-                </div>
-            </Container>
+            {render_main_container(
+                &self.model_input,
+                self.input_disabled,
+                &ctx,
+                button_disabled,
+                self.current_progress,
+                &self.status_label,
+            )}
             {include_cdn_js()}
-            <footer class="text-center text-white fixed-bottom bg-dark">
-                <div class="text-center p-3">
-                    <p>{" Hacking Lab team @ TUDelft 2023 "}</p>
-                </div>
-            </footer>
+            {render_footer()}
         </>
         }
     }
@@ -377,15 +113,11 @@ impl Component for AppRoot {
 
 impl AppRoot {
     fn start_benchmarks(&mut self) {
-        self.button_disabled = true;
-        self.input_disabled = true;
-        self.benchmark_results = vec![];
+        self.disable_controls();
+        self.initialize_benchmark_data();
 
-        self.remaining_benchmarks = VecDeque::from(vec![
-            // TODO: Add remaining benchmarks
-            BenchmarkType::PageSize,
-            BenchmarkType::CacheSize,
-        ]);
+        self.start_next_benchmark_or_send(None);
+
 
         // Start with first benchmark
         let benchmark = self
@@ -393,24 +125,44 @@ impl AppRoot {
             .pop_front()
             .expect("No benchmarks specified");
         self.status_label = benchmark.to_string();
+        self.current_progress = self.finished_benchmarks as f32 / self.total_benchmarks as f32 * 100.0;
         self.bridge.send(BenchmarkInput { benchmark });
+    }
+
+    fn disable_controls(&mut self) {
+        self.button_disabled = true;
+        self.input_disabled = true;
+    }
+
+    fn initialize_benchmark_data(&mut self) {
+        self.benchmark_results = vec![];
+        self.remaining_benchmarks = VecDeque::from(vec![
+            // TODO: Add remaining benchmarks
+            BenchmarkType::PageSize,
+            BenchmarkType::CacheSize,
+        ]);
+
+        self.total_benchmarks = self.remaining_benchmarks.len();
+    }
+
+    fn start_next_benchmark_or_send(&mut self, ctx: Option<&Context<Self>>) {
+        if let Some(benchmark) = self.remaining_benchmarks.pop_front() {
+            self.update_status_and_progress(benchmark);
+            self.bridge.send(BenchmarkInput { benchmark });
+        } else if let Some(ctx) = ctx {
+            self.send_result(ctx);
+        }
+    }
+
+    fn update_status_and_progress(&mut self, benchmark: BenchmarkType) {
+        self.status_label = benchmark.to_string();
+        self.finished_benchmarks += 1;
+        self.current_progress = self.finished_benchmarks as f32 / self.total_benchmarks as f32 * 100.0;
     }
 
     fn handle_benchmark_complete(&mut self, ctx: &Context<Self>, result: BenchmarkResult) {
         self.benchmark_results.push(result);
-
-        let next_benchmark = self.remaining_benchmarks.pop_front();
-        match next_benchmark {
-            Some(benchmark) => {
-                // Run next benchmark
-                self.status_label = benchmark.to_string();
-                self.bridge.send(BenchmarkInput { benchmark });
-            }
-            None => {
-                // No more benchmarks - send results to backend
-                self.send_result(ctx);
-            }
-        }
+        self.start_next_benchmark_or_send(Some(ctx));
     }
 
     fn send_result(&self, ctx: &Context<Self>) {
