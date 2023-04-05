@@ -117,16 +117,6 @@ impl AppRoot {
         self.initialize_benchmark_data();
 
         self.start_next_benchmark_or_send(None);
-
-
-        // Start with first benchmark
-        let benchmark = self
-            .remaining_benchmarks
-            .pop_front()
-            .expect("No benchmarks specified");
-        self.status_label = benchmark.to_string();
-        self.current_progress = self.finished_benchmarks as f32 / self.total_benchmarks as f32 * 100.0;
-        self.bridge.send(BenchmarkInput { benchmark });
     }
 
     fn disable_controls(&mut self) {
@@ -140,6 +130,9 @@ impl AppRoot {
             // TODO: Add remaining benchmarks
             BenchmarkType::PageSize,
             BenchmarkType::CacheSize,
+            BenchmarkType::TlbSize,
+            BenchmarkType::SinglePerformance,
+            BenchmarkType::CacheAssociativity,
         ]);
 
         self.total_benchmarks = self.remaining_benchmarks.len();
@@ -148,7 +141,10 @@ impl AppRoot {
     fn start_next_benchmark_or_send(&mut self, ctx: Option<&Context<Self>>) {
         if let Some(benchmark) = self.remaining_benchmarks.pop_front() {
             self.update_status_and_progress(benchmark);
-            self.bridge.send(BenchmarkInput { benchmark });
+            self.bridge.send(BenchmarkInput {
+                page_origin: get_page_origin(),
+                benchmark,
+            });
         } else if let Some(ctx) = ctx {
             self.send_result(ctx);
         }
@@ -221,10 +217,17 @@ fn get_user_agent() -> Option<String> {
     }
 }
 
+fn get_page_origin() -> String {
+    let window = web_sys::window().expect("Missing window");
+    window.location()
+        .origin()
+        .expect("Missing origin information")
+}
+
 /// TODO: For removal once benchmarks are fully handled by dedicated worker(s)
 fn run_profilers<T>(profiler_prehook: T) -> (Vec<Value>, Vec<f32>)
-    where
-        T: FnOnce(&dyn Profiler) + Copy,
+where
+    T: FnOnce(&dyn Profiler) + Copy,
 {
     let profilers: Vec<Box<dyn Profiler>> = vec![
         Box::new(PageSizeProfiler {}),
