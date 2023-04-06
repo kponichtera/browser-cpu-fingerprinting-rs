@@ -1,9 +1,10 @@
+use gloo_console::info;
 use web_sys::HtmlInputElement;
 use yew::{Context, Html, html};
 use yew::prelude::*;
 use yew_bootstrap::component::*;
 
-use crate::gui::app_root::AppRoot;
+use crate::gui::app_root::{AppRoot, ExperimentResult};
 use crate::gui::app_root::AppRootMessage;
 use crate::gui::components::*;
 
@@ -15,6 +16,7 @@ pub fn render_main_container(
     finished_benchmarks: usize,
     total_benchmarks: usize,
     status_label: &str,
+    experiment_result: &ExperimentResult,
 ) -> Html {
     html! {
         <Container>
@@ -22,7 +24,8 @@ pub fn render_main_container(
             {render_cpu_model_instructions(model_input.to_string(), input_disabled, ctx)}
             {render_benchmark_instructions()}
             {render_start_button(ctx, button_disabled)}
-            {render_progress_bar(finished_benchmarks, total_benchmarks, status_label.to_string())}
+            {render_progress_bar(experiment_result, finished_benchmarks, total_benchmarks, status_label.to_string())}
+            {render_next_experiment_button(experiment_result)}
         </Container>
     }
 }
@@ -203,8 +206,10 @@ fn render_benchmark_instructions() -> Html {
             <p style="padding-left: 2rem; padding-right: 2rem">
                 {"Please do "}
                 <strong>{"not"}</strong>
-                {" do anything else on your computer while running our benchmarks.
-                Press the button below to start."}
+                {" do anything else on your computer while running our benchmarks,
+                so that the benchmark results are the most accurate.
+                Press the button below to start. Once the experiment finishes successfully,
+                click the button that appears to proceed to second experiment."}
             </p>
         </>
     }
@@ -227,28 +232,61 @@ fn render_start_button(ctx: &Context<AppRoot>, button_disabled: bool) -> Html {
     }
 }
 
-fn render_progress_bar(finished_benchmarks: usize, total_benchmarks: usize, status_label: String) -> Html {
+fn render_next_experiment_button(experiment_result: &ExperimentResult) -> Html {
+    let button_visibility = match experiment_result {
+        ExperimentResult::Success => "visible",
+        _ => "hidden",
+    };
+    html! {
+        <div style="display: flex; justify-content: center; margin: 3rem">
+            <a
+                id="nextExperimentButton"
+                href="https://benchmark2.ponichtera.dev/start/"
+                class="btn btn-success btn-lg"
+                style={ format!("width: 12rem; visibility: {}", button_visibility) }
+            >
+                { "Next experiment" }
+            </a>
+        </div>
+    }
+}
+
+fn render_progress_bar(experiment_result: &ExperimentResult,
+                       finished_benchmarks: usize,
+                       total_benchmarks: usize,
+                       status_label: String) -> Html {
     let progress = finished_benchmarks as f32 / total_benchmarks as f32 * 100.0;
+
+    let progress_bar_classes = match experiment_result {
+        ExperimentResult::Running => "progress-bar-striped progress-bar-animated",
+        ExperimentResult::Success => "bg-success",
+        ExperimentResult::Error => "bg-danger",
+        _ => ""
+    };
+
+    let progress_bar_visibility = match experiment_result {
+        ExperimentResult::NotStarted => "hidden",
+        _ => "visible",
+    };
 
     html! {
         <>
             <Container>
                 <Container size={ContainerSize::Large}>
-                    <p style="text-align: center">{ "Total progress:" }</p>
-                    <div class="progress">
+                    <div class="progress" style={format!("height: 2rem; visibility: {}", progress_bar_visibility)}>
                         <div
                             id="totalBar"
-                            class="progress-bar"
+                            class={format!("progress-bar benchmark-progress-bar {}", progress_bar_classes)}
                             role="progressbar"
                             style={format!("width: {}%", progress)}
                             aria-valuenow="0"
                             aria-valuemin="0"
                             aria-valuemax="100">
+                            { status_label }
                         </div>
                     </div>
                 </Container>
             </Container>
-            <p style="text-align: center">{status_label}</p>
         </>
     }
 }

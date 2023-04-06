@@ -31,6 +31,13 @@ pub enum AppRootMessage {
     BenchmarksFinished(u16, String),
 }
 
+pub enum ExperimentResult {
+    NotStarted,
+    Running,
+    Success,
+    Error
+}
+
 pub struct AppRoot {
     bridge: Box<dyn Bridge<BenchmarkWorker>>,
 
@@ -40,6 +47,8 @@ pub struct AppRoot {
     input_disabled: bool,
     total_benchmarks: usize,
     finished_benchmarks: usize,
+
+    experiment_result: ExperimentResult,
 
     benchmark_results: Vec<BenchmarkResult>,
     remaining_benchmarks: VecDeque<BenchmarkType>,
@@ -64,6 +73,7 @@ impl Component for AppRoot {
             remaining_benchmarks: VecDeque::new(),
             total_benchmarks: 0,
             finished_benchmarks: 0,
+            experiment_result: ExperimentResult::NotStarted
         }
     }
 
@@ -102,6 +112,7 @@ impl Component for AppRoot {
                 self.finished_benchmarks,
                 self.total_benchmarks,
                 &self.status_label,
+                &self.experiment_result
             )}
             {include_cdn_js()}
             {render_footer()}
@@ -112,15 +123,16 @@ impl Component for AppRoot {
 
 impl AppRoot {
     fn start_benchmarks(&mut self) {
-        self.disable_controls();
+        self.experiment_result = ExperimentResult::Running;
+        self.disable_controls(true);
         self.initialize_benchmark_data();
 
         self.start_next_benchmark_or_send(None);
     }
 
-    fn disable_controls(&mut self) {
-        self.button_disabled = true;
-        self.input_disabled = true;
+    fn disable_controls(&mut self, disabled: bool) {
+        self.button_disabled = disabled;
+        self.input_disabled = disabled;
     }
 
     fn initialize_benchmark_data(&mut self) {
@@ -150,7 +162,7 @@ impl AppRoot {
     }
 
     fn update_status_and_progress(&mut self, benchmark: BenchmarkType) {
-        self.status_label = format!("Running benchmark: {}", benchmark);
+        self.status_label = format!("Running: {}", benchmark);
         self.finished_benchmarks += 1;
     }
 
@@ -186,17 +198,17 @@ impl AppRoot {
     }
 
     fn handle_benchmarks_finished(&mut self, status: u16, status_text: String) {
-        self.button_disabled = false;
-        self.input_disabled = false;
+        self.disable_controls(false);
 
         if status == 200 {
             // Success
+            self.experiment_result = ExperimentResult::Success;
             self.status_label = String::from("Benchmarking finished");
         } else {
             // Something is wrong
+            self.experiment_result = ExperimentResult::Error;
             self.status_label = format!("Error: {}. Please try again.", status_text);
         }
-
     }
 
     fn parse_results(&self) -> (Vec<Value>, Vec<f32>) {
