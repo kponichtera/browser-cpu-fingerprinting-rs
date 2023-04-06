@@ -28,7 +28,14 @@ pub enum AppRootMessage {
     ChangeModel(String),
     StartBenchmarks,
     BenchmarkComplete(BenchmarkResult),
-    BenchmarksFinished(String),
+    BenchmarksFinished(u16, String),
+}
+
+pub enum ExperimentResult {
+    NotStarted,
+    Running,
+    Success,
+    Error
 }
 
 pub struct AppRoot {
@@ -40,7 +47,8 @@ pub struct AppRoot {
     input_disabled: bool,
     total_benchmarks: usize,
     finished_benchmarks: usize,
-    current_progress: f32,
+
+    experiment_result: ExperimentResult,
 
     benchmark_results: Vec<BenchmarkResult>,
     remaining_benchmarks: VecDeque<BenchmarkType>,
@@ -65,7 +73,7 @@ impl Component for AppRoot {
             remaining_benchmarks: VecDeque::new(),
             total_benchmarks: 0,
             finished_benchmarks: 0,
-            current_progress: 0.0,
+            experiment_result: ExperimentResult::NotStarted
         }
     }
 
@@ -83,8 +91,8 @@ impl Component for AppRoot {
                 self.handle_benchmark_complete(ctx, result);
                 true
             }
-            AppRootMessage::BenchmarksFinished(status) => {
-                self.handle_benchmarks_finished(status);
+            AppRootMessage::BenchmarksFinished(status, status_text) => {
+                self.handle_benchmarks_finished(status, status_text);
                 true
             }
         }
@@ -101,8 +109,10 @@ impl Component for AppRoot {
                 self.input_disabled,
                 &ctx,
                 button_disabled,
-                self.current_progress,
+                self.finished_benchmarks,
+                self.total_benchmarks,
                 &self.status_label,
+                &self.experiment_result
             )}
             {include_cdn_js()}
             {render_footer()}
@@ -113,15 +123,16 @@ impl Component for AppRoot {
 
 impl AppRoot {
     fn start_benchmarks(&mut self) {
-        self.disable_controls();
+        self.experiment_result = ExperimentResult::Running;
+        self.disable_controls(true);
         self.initialize_benchmark_data();
 
         self.start_next_benchmark_or_send(None);
     }
 
-    fn disable_controls(&mut self) {
-        self.button_disabled = true;
-        self.input_disabled = true;
+    fn disable_controls(&mut self, disabled: bool) {
+        self.button_disabled = disabled;
+        self.input_disabled = disabled;
     }
 
     fn initialize_benchmark_data(&mut self) {
@@ -131,8 +142,8 @@ impl AppRoot {
             BenchmarkType::PageSize,
             BenchmarkType::CacheSize,
             BenchmarkType::TlbSize,
-            BenchmarkType::SinglePerformance,
             BenchmarkType::CacheAssociativity,
+            BenchmarkType::SinglePerformance,
         ]);
 
         self.total_benchmarks = self.remaining_benchmarks.len();
@@ -151,9 +162,8 @@ impl AppRoot {
     }
 
     fn update_status_and_progress(&mut self, benchmark: BenchmarkType) {
-        self.status_label = benchmark.to_string();
+        self.status_label = format!("Running: {}", benchmark);
         self.finished_benchmarks += 1;
-        self.current_progress = self.finished_benchmarks as f32 / self.total_benchmarks as f32 * 100.0;
     }
 
     fn handle_benchmark_complete(&mut self, ctx: &Context<Self>, result: BenchmarkResult) {
@@ -161,7 +171,7 @@ impl AppRoot {
         self.start_next_benchmark_or_send(Some(ctx));
     }
 
-    fn send_result(&self, ctx: &Context<Self>) {
+    fn send_result(&mut self, ctx: &Context<Self>) {
         let (results, times) = self.parse_results();
 
         let result = ResultDTO {
@@ -173,23 +183,32 @@ impl AppRoot {
 
         let link = ctx.link().clone();
 
+        self.status_label = String::from("Uploading results...");
+
         wasm_bindgen_futures::spawn_local(async move {
-            let status = Request::post("/api/result/upload")
+            let response = Request::post("/api/result/upload")
                 .json(&result)
                 .unwrap()
                 .send()
                 .await
-                .unwrap()
-                .status_text();
+                .unwrap();
 
-            link.send_message(AppRootMessage::BenchmarksFinished(status));
+            link.send_message(AppRootMessage::BenchmarksFinished(response.status(), response.status_text()));
         });
     }
 
-    fn handle_benchmarks_finished(&mut self, status: String) {
-        self.button_disabled = false;
-        self.input_disabled = false;
-        self.status_label = status;
+    fn handle_benchmarks_finished(&mut self, status: u16, status_text: String) {
+        self.disable_controls(false);
+
+        if status == 200 {
+            // Success
+            self.experiment_result = ExperimentResult::Success;
+            self.status_label = String::from("Benchmarking finished");
+        } else {
+            // Something is wrong
+            self.experiment_result = ExperimentResult::Error;
+            self.status_label = format!("Error: {}. Please try again.", status_text);
+        }
     }
 
     fn parse_results(&self) -> (Vec<Value>, Vec<f32>) {
