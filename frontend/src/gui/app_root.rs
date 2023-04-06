@@ -127,11 +127,11 @@ impl AppRoot {
         self.benchmark_results = vec![];
         self.remaining_benchmarks = VecDeque::from(vec![
             // TODO: Add remaining benchmarks
-            // BenchmarkType::PageSize,
-            // BenchmarkType::CacheSize,
-            // BenchmarkType::TlbSize,
+            BenchmarkType::PageSize,
+            BenchmarkType::CacheSize,
+            BenchmarkType::TlbSize,
+            BenchmarkType::CacheAssociativity,
             BenchmarkType::SinglePerformance,
-            // BenchmarkType::CacheAssociativity,
         ]);
 
         self.total_benchmarks = self.remaining_benchmarks.len();
