@@ -12,15 +12,17 @@ pub fn render_main_container(
     input_disabled: bool,
     ctx: &Context<AppRoot>,
     button_disabled: bool,
-    current_progress: f32,
+    finished_benchmarks: usize,
+    total_benchmarks: usize,
     status_label: &str,
 ) -> Html {
     html! {
         <Container>
             {render_header()}
             {render_cpu_model_instructions(model_input.to_string(), input_disabled, ctx)}
-            {render_benchmark_instructions(ctx, button_disabled)}
-            {render_progress_bar(current_progress, status_label.to_string())}
+            {render_benchmark_instructions()}
+            {render_start_button(ctx, button_disabled)}
+            {render_progress_bar(finished_benchmarks, total_benchmarks, status_label.to_string())}
         </Container>
     }
 }
@@ -28,24 +30,26 @@ pub fn render_main_container(
 fn render_header() -> Html {
     html! {
         <>
-            <h1 style={"text-align: center; padding-top: 3rem"}>
-                { "RUST WASM CPU fingerprinting" }
+            <h1 style="text-align: center; padding-top: 3rem">
+                { "Browser CPU fingerprinting" }
             </h1>
-            <p style={"margin: 2rem"}>
+            <p style="margin: 2rem">
                 { "This site will run a few JavaScript benchmarks to gather information
                 about your CPU. This results of these benchmarks will then be uploaded
-                to our server, where they are then stored in a database. Please click " }
-                <code>{ "Continue" }</code>
-                { " and follow the short instructions on the next page.
-                For more information check out the FAQ at the bottom." }
+                to our server, where they are then stored in a database.
+                We do not collect or store any personal data. Our project is based on the research
+                of CISPA Helmholtz Center for Information Security in Saarbrucken, Saarland, Germany.
+                To access the original paper, click " }
+                <a href="https://publications.cispa.saarland/3745/1/paper.pdf" target="_blank">{ "here" }</a>
+                { "." }
             </p>
             <p style="padding-left: 2rem; padding-right: 2rem">
                 { "Our benchmarks are designed for the latest versions of " }
                 <strong>{ "Firefox" }</strong>
                 { " and " }
                 <strong>{ "Chrome" }</strong>
-                { "-based browsers (e.g. Google Chrome, Chromium, Microsoft Edge etc.).\
-                Most importantly Safari and iOS devices are not supported." }
+                { "-based browsers (e.g. Google Chrome, Chromium, Microsoft Edge etc.). " }
+                { "Safari and iOS devices are not supported." }
             </p>
         </>
     }
@@ -86,7 +90,7 @@ pub fn render_cpu_model_instructions(model_input: String, input_disabled: bool, 
                             <li>
                                 { "Type " }
                                 <code>{ "wmic cpu get name" }</code>
-                                { "in the prompt and hit" }
+                                { " in the prompt and hit " }
                                 <kbd>{ "Enter" }</kbd>
                                 { ". The output should look something like this." }
                                 <code>
@@ -190,7 +194,7 @@ pub fn render_cpu_model_instructions(model_input: String, input_disabled: bool, 
     }
 }
 
-fn render_benchmark_instructions(ctx: &Context<AppRoot>, button_disabled: bool) -> Html {
+fn render_benchmark_instructions() -> Html {
     html! {
         <>
             <h5 style="padding-left: 2rem; padding-right: 2rem; padding-top: 3rem">
@@ -200,26 +204,32 @@ fn render_benchmark_instructions(ctx: &Context<AppRoot>, button_disabled: bool) 
                 {"Please do "}
                 <strong>{"not"}</strong>
                 {" do anything else on your computer while running our benchmarks.
-                To ensure that you leave the tab open, you will have to press the button
-                at the bottom at least every 30 seconds. Press the START-button to start."}
+                Press the button below to start."}
             </p>
-            <div style="display: flex; justify-content: center; margin: 3rem">
-                <button
-                    id="startButton"
-                    class="btn btn-primary btn-lg"
-                    style="width: 6.5rem"
-                    type="button"
-                    onclick={ctx.link().callback(|_| { AppRootMessage::StartBenchmarks })}
-                    disabled={button_disabled}
-                >
-                    { "Run tests" }
-                </button>
-            </div>
         </>
     }
 }
 
-fn render_progress_bar(current_progress: f32, status_label: String) -> Html {
+fn render_start_button(ctx: &Context<AppRoot>, button_disabled: bool) -> Html {
+    html! {
+        <div style="display: flex; justify-content: center; margin: 3rem">
+            <button
+                id="startButton"
+                class="btn btn-primary btn-lg"
+                style="width: 6.5rem"
+                type="button"
+                onclick={ctx.link().callback(|_| { AppRootMessage::StartBenchmarks })}
+                disabled={button_disabled}
+            >
+                { "START" }
+            </button>
+        </div>
+    }
+}
+
+fn render_progress_bar(finished_benchmarks: usize, total_benchmarks: usize, status_label: String) -> Html {
+    let progress = finished_benchmarks as f32 / total_benchmarks as f32 * 100.0;
+
     html! {
         <>
             <Container>
@@ -230,7 +240,7 @@ fn render_progress_bar(current_progress: f32, status_label: String) -> Html {
                             id="totalBar"
                             class="progress-bar"
                             role="progressbar"
-                            style={format!("width: {}%", current_progress)}
+                            style={format!("width: {}%", progress)}
                             aria-valuenow="0"
                             aria-valuemin="0"
                             aria-valuemax="100">
@@ -238,7 +248,7 @@ fn render_progress_bar(current_progress: f32, status_label: String) -> Html {
                     </div>
                 </Container>
             </Container>
-            <p>{status_label}</p>
+            <p style="text-align: center">{status_label}</p>
         </>
     }
 }
@@ -252,7 +262,7 @@ pub fn render_footer() -> Html {
         </Container>
         <footer class="text-center text-white fixed-bottom bg-dark">
             <div class="text-center p-3">
-                <p>{" Hacking Lab team @ TUDelft 2023 "}</p>
+                <p>{" D. Plămădeală, J. van Vliet, J. Naucke, C. Xu, K. Ponichtera @ TU Delft 2023 "}</p>
             </div>
         </footer>
         </>
