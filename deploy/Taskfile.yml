@@ -7,7 +7,7 @@ vars:
 
 tasks:
   compose: "{{.DEV_COMPOSE}} {{.CLI_ARGS}}"
-  compose:up: "{{.DEV_COMPOSE}} up --build {{.CLI_ARGS}}"
+  compose:up: "{{.DEV_COMPOSE}} up --build --detach {{.CLI_ARGS}}"
   compose:start: "{{.DEV_COMPOSE}} up --detach {{.CLI_ARGS}}"
   compose:stop: "{{.DEV_COMPOSE}} stop {{.CLI_ARGS}}"
   compose:down: "{{.DEV_COMPOSE}} down --volumes {{.CLI_ARGS}}"
