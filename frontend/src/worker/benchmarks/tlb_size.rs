@@ -34,12 +34,12 @@ pub fn run_tlb_size_benchmark(clock: Clock) -> BenchmarkResult {
             
             let mut p = 0;
             
-            for _ in 0..s {
+            for _ in 0..size {
                 p = black_box(list[p]);
             }
 
             let start = clock.read().unwrap();
-            for _ in 0..s {
+            for _ in 0..size {
                 p = black_box(list[p]);
             }
             let end = clock.read().unwrap();
