@@ -103,13 +103,13 @@ pub fn render_cpu_model_instructions(
                                 <code>
                                     <p>{ "Name" }</p>
                                     <p style="margin-top: -1rem">
-                                        { "Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz" }
+                                        { "Intel(R) Core(TM) i3-10900K CPU @ 3.10GHz" }
                                     </p>
                                 </code>
                                 </li>
                             <li>
                                 { "Your CPU model is the second line of the output. In this case: " }
-                                <code>{ "Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz" }</code>
+                                <code>{ "Intel(R) Core(TM) i3-10900K CPU @ 3.10GHz" }</code>
                             </li>
                         </ol>
                     </AccordionCollapse>
@@ -129,12 +129,12 @@ pub fn render_cpu_model_instructions(
                                 {"."}
                                 {" The output should look something like this:"}
                                 <code>
-                                    <p>{"model name: Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz"}</p>
+                                    <p>{"model name: Intel(R) Core(TM) i3-10900K CPU @ 3.10GHz"}</p>
                                 </code>
                             </li>
                             <li>
                                 {"Your CPU model is the second part of the output. In this case: "}
-                                <code>{" Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz "}</code>
+                                <code>{" Intel(R) Core(TM) i3-10900K CPU @ 3.10GHz "}</code>
                             </li>
                         </ol>
                     </AccordionCollapse>
@@ -155,13 +155,13 @@ pub fn render_cpu_model_instructions(
                                 {" The output should look something like this:"}
                                 <code>
                                     <p>
-                                        {"machdep.cpu.brand_string: Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz"}
+                                        {"machdep.cpu.brand_string: Intel(R) Core(TM) i3-10900K CPU @ 3.10GHz"}
                                     </p>
                                 </code>
                             </li>
                             <li>
                                 {"Your CPU model is the second part of the output. In this case: "}
-                                <code>{" Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz "}</code>
+                                <code>{" Intel(R) Core(TM) i3-10900K CPU @ 3.10GHz "}</code>
                             </li>
                         </ol>
                     </AccordionCollapse>
