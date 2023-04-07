@@ -13,7 +13,7 @@ const KB: usize = 1024;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct DataPoint {
-    x: u16,
+    x: u64,
     y: i64,
 }
 
@@ -25,7 +25,7 @@ pub fn run_cache_size_benchmark(clock: Clock) -> BenchmarkResult {
     let l2 = (1..=1).map(|x| x * 1024);
     let l3 = (2..=32).step_by(2).map(|x| x * 1024);
 
-    let sizes: Vec<u16> = l0.chain(l1).chain(l2).chain(l3).collect();
+    let sizes: Vec<u64> = l0.chain(l1).chain(l2).chain(l3).collect();
 
     let mut rand = rand::thread_rng();
     let result: Vec<DataPoint> = sizes
@@ -56,7 +56,7 @@ pub fn run_cache_size_benchmark(clock: Clock) -> BenchmarkResult {
                 p = black_box(list[p]);
             }
             let end = clock.read().unwrap();
-            DataPoint { x: s, y: (end - start) / s as i64 }
+            DataPoint { x: s * 1024, y: (end - start) / s as i64 }
         })
         .collect::<Vec<_>>();
 
