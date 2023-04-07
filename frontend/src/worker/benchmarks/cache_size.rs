@@ -19,7 +19,7 @@ struct DataPoint {
 
 pub fn run_cache_size_benchmark(clock: Clock) -> BenchmarkResult {
     info!("Running cache size benchmark");
-    let starting_time = clock.read().unwrap();
+    let starting_time = clock.read();
     let l1 = (10..150).step_by(2);
     let l2 = (150..2000).step_by(50);
     let l3 = (2000..25000).step_by(500);
@@ -50,11 +50,11 @@ pub fn run_cache_size_benchmark(clock: Clock) -> BenchmarkResult {
 
 
             p = 0;
-            let start = clock.read().unwrap();
+            let start = clock.read();
             for _ in 0..size {
                 p = black_box(list[p]);
             }
-            let end = clock.read().unwrap();
+            let end = clock.read();
             DataPoint { x: s, y: (end - start) / s as i64 }
         })
         .collect::<Vec<_>>();
@@ -62,6 +62,6 @@ pub fn run_cache_size_benchmark(clock: Clock) -> BenchmarkResult {
     BenchmarkResult {
         benchmark: BenchmarkType::CacheSize,
         result_json: json!(result).to_string(),
-        time: (clock.read().unwrap() - starting_time) as f32,
+        time: (clock.read() - starting_time) as f32,
     }
 }

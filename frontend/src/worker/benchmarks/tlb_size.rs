@@ -18,7 +18,7 @@ struct DataPoint {
 
 pub fn run_tlb_size_benchmark(clock: Clock) -> BenchmarkResult {
     info!("Running TLB size benchmark");
-    let starting_time = clock.read().unwrap();
+    let starting_time = clock.read();
     let entries = (2..126).step_by(4);
     let mut rand = rand::thread_rng();
     let result: Vec<DataPoint> = entries
@@ -38,11 +38,11 @@ pub fn run_tlb_size_benchmark(clock: Clock) -> BenchmarkResult {
                 p = black_box(list[p]);
             }
 
-            let start = clock.read().unwrap();
+            let start = clock.read();
             for _ in 0..s {
                 p = black_box(list[p]);
             }
-            let end = clock.read().unwrap();
+            let end = clock.read();
 
             info!(s, end - start);
             DataPoint {
@@ -55,6 +55,6 @@ pub fn run_tlb_size_benchmark(clock: Clock) -> BenchmarkResult {
     BenchmarkResult {
         benchmark: BenchmarkType::TlbSize,
         result_json: json!(result).to_string(),
-        time: (clock.read().unwrap() - starting_time) as f32,
+        time: (clock.read() - starting_time) as f32,
     }
 }

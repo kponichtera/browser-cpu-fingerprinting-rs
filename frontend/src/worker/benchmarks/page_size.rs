@@ -9,17 +9,12 @@ use crate::worker::{BenchmarkResult, BenchmarkType};
 
 // Constants
 const MB: usize = 1024 * 1024;
-const MAXSIZE: usize = (MB + 100) / 8;
-
 const START: usize = 512;
-
-// const BUFFER_SIZE: usize = 64 * 1024 * 1024;
-// const WASM_PAGE_SIZE: usize = 64 * 1024;
-// const AMOUNT_OF_PAGES: usize  = BUFFER_SIZE / WASM_PAGE_SIZE;
+const MAXSIZE: usize = MB + 100;
 
 #[derive(Serialize)]
 struct DataPoint {
-    x: i64,
+    x: usize,
     y: i64,
 }
 
@@ -29,39 +24,32 @@ pub fn run_page_size_benchmark(clock: Clock) -> BenchmarkResult {
     let mut buffer = [0; MAXSIZE];
     let mut size = 0;
 
-    let mut results: Vec<i64> = Vec::new();
+    let mut results: Vec<DataPoint> = Vec::new();
 
     while START + size * 4 < MAXSIZE {
-        let start = clock.read().unwrap();
+        let diff = black_box(iteration(&clock, &mut buffer, black_box(START + size * 4)));
 
-        black_box(iteration(black_box(&mut buffer), black_box(size)));
-
-        let end = clock.read().unwrap();
-
-        let diff = end - start;
-        results.push(diff);
-        size += 1;
-    }
-
-    let mut result: Vec<DataPoint> = vec![];
-
-    for (index, data) in results.into_iter().enumerate() {
-        result.push(DataPoint {
-            x: index as i64,
-            y: data,
+        results.push(DataPoint {
+            x: START + size * 4,
+            y: diff,
         });
-        if data > 10 {
-            info!(format!("{}: {}", index, data));
-        }
+        size += 1;
     }
 
     BenchmarkResult {
         benchmark: BenchmarkType::PageSize,
-        result_json: json!(result).to_string(),
+        result_json: json!(results).to_string(),
         time: 0.0,
     }
 }
 
-fn iteration(buffer: &mut [i32; MAXSIZE], i: usize) {
-    let _ = buffer[i];
+#[allow(unused_variables, unused_assignments)]
+fn iteration(clock: &Clock, buffer: &mut [i32; MAXSIZE], i: usize) -> i64 {
+    let start = clock.read();
+
+    let mut tmp = 0;
+    tmp = unsafe { std::ptr::read(buffer.as_mut_ptr().add(i)) };
+
+    let end = clock.read();
+    end - start
 }

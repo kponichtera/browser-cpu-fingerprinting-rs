@@ -15,7 +15,7 @@ pub fn run_single_performance_benchmark(clock: Clock) -> BenchmarkResult {
 
     info!("Running single core performance benchmark");
 
-    let total_starting_time = clock.read().unwrap();
+    let total_starting_time = clock.read();
 
     let iterations = 500; // should be 500 for production; 10 for quick testing now. 
     let mut counter;
@@ -40,8 +40,8 @@ pub fn run_single_performance_benchmark(clock: Clock) -> BenchmarkResult {
     info!("Single core: first iteration");
     for i in 0..iterations {
         counter = 0;
-        end = clock.read().unwrap() + 1000;
-        while end > clock.read().unwrap() {
+        end = clock.read() + 1000;
+        while end > clock.read() {
             counter += 1;
         }
         data_array.push(DataPoint { x: (i), y: (counter) });
@@ -50,8 +50,8 @@ pub fn run_single_performance_benchmark(clock: Clock) -> BenchmarkResult {
     info!("Single core: second iteration");
     for i in iterations..iterations*2 {
         counter = 0;
-        end = clock.read().unwrap() + 1000;
-        while end > clock.read().unwrap() {
+        end = clock.read() + 1000;
+        while end > clock.read() {
             counter += 1;
         }
         data_array.push(DataPoint { x: (i), y: (counter) });
@@ -60,8 +60,8 @@ pub fn run_single_performance_benchmark(clock: Clock) -> BenchmarkResult {
     info!("Single core: third iteration");
     for i in iterations*2..iterations*3 {
         counter = 0;
-        end = clock.read().unwrap() + 1000;
-        while end > clock.read().unwrap() {
+        end = clock.read() + 1000;
+        while end > clock.read() {
             counter += 1;
         }
         data_array.push(DataPoint { x: (i), y: (counter) });
@@ -70,6 +70,6 @@ pub fn run_single_performance_benchmark(clock: Clock) -> BenchmarkResult {
     BenchmarkResult {
         benchmark: BenchmarkType::SinglePerformance,
         result_json: json!(data_array).to_string(),
-        time: (clock.read().unwrap() - total_starting_time) as f32,
+        time: (clock.read() - total_starting_time) as f32,
     }
 }
