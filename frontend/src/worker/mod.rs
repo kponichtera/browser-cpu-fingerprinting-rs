@@ -4,11 +4,11 @@ use serde::{Deserialize, Serialize};
 use yew_agent::{HandlerId, Private, Worker, WorkerLink};
 
 use crate::clock::Clock;
-use crate::worker::benchmarks::tlb_size::run_tlb_size_benchmark;
-use crate::worker::benchmarks::single_performance::run_single_performance_benchmark;
 use crate::worker::benchmarks::cache_associativity::run_cache_associativity_benchmark;
 use crate::worker::benchmarks::cache_size::run_cache_size_benchmark;
 use crate::worker::benchmarks::page_size::run_page_size_benchmark;
+use crate::worker::benchmarks::single_performance::run_single_performance_benchmark;
+use crate::worker::benchmarks::tlb_size::run_tlb_size_benchmark;
 use crate::worker::clock::start_clock_worker;
 
 mod benchmarks;
