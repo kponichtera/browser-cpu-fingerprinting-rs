@@ -1,9 +1,9 @@
-use std::hint::black_box;
-use std::mem::size_of;
 use gloo_console::info;
 use rand::seq::SliceRandom;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use std::hint::black_box;
+use std::mem::size_of;
 
 use crate::clock::Clock;
 use crate::worker::{BenchmarkResult, BenchmarkType};
@@ -31,9 +31,9 @@ pub fn run_tlb_size_benchmark(clock: Clock) -> BenchmarkResult {
 
             indices.windows(2).for_each(|w| list[w[0]] = w[1]);
             list[indices[s - 1]] = indices[0];
-            
+
             let mut p = 0;
-            
+
             for _ in 0..s {
                 p = black_box(list[p]);
             }

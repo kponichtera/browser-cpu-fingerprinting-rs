@@ -48,14 +48,16 @@ pub fn run_cache_size_benchmark(clock: Clock) -> BenchmarkResult {
                 p = black_box(list[p]);
             }
 
-
             p = 0;
             let start = clock.read();
             for _ in 0..size {
                 p = black_box(list[p]);
             }
             let end = clock.read();
-            DataPoint { x: s, y: (end - start) / s as i64 }
+            DataPoint {
+                x: s,
+                y: (end - start) / s as i64,
+            }
         })
         .collect::<Vec<_>>();
 

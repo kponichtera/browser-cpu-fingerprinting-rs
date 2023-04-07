@@ -59,7 +59,10 @@ impl Profiler for CacheSizeProfiler {
                     p = std::hint::black_box(list[p]);
                 }
                 let end = Instant::now();
-                DataPoint { x: s, y: end.duration_since(start).as_nanos() }
+                DataPoint {
+                    x: s,
+                    y: end.duration_since(start).as_nanos(),
+                }
             })
             .collect::<Vec<_>>();
         (json!(result), 0.0)
