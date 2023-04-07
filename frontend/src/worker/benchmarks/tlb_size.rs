@@ -1,9 +1,9 @@
-use std::hint::black_box;
-use std::mem::size_of;
 use gloo_console::info;
 use rand::seq::SliceRandom;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use std::hint::black_box;
+use std::mem::size_of;
 
 use crate::clock::Clock;
 use crate::worker::{BenchmarkResult, BenchmarkType};
@@ -18,7 +18,7 @@ struct DataPoint {
 
 pub fn run_tlb_size_benchmark(clock: Clock) -> BenchmarkResult {
     info!("Running TLB size benchmark");
-    let starting_time = clock.read().unwrap();
+    let starting_time = clock.read();
     let entries = (2..126).step_by(4);
     let mut rand = rand::thread_rng();
     let result: Vec<DataPoint> = entries
@@ -31,18 +31,18 @@ pub fn run_tlb_size_benchmark(clock: Clock) -> BenchmarkResult {
 
             indices.windows(2).for_each(|w| list[w[0]] = w[1]);
             list[indices[s - 1]] = indices[0];
-            
+
             let mut p = 0;
-            
-            for _ in 0..s {
+
+            for _ in 0..size {
                 p = black_box(list[p]);
             }
 
-            let start = clock.read().unwrap();
-            for _ in 0..s {
+            let start = clock.read();
+            for _ in 0..size {
                 p = black_box(list[p]);
             }
-            let end = clock.read().unwrap();
+            let end = clock.read();
 
             info!(s, end - start);
             DataPoint {
@@ -55,6 +55,6 @@ pub fn run_tlb_size_benchmark(clock: Clock) -> BenchmarkResult {
     BenchmarkResult {
         benchmark: BenchmarkType::TlbSize,
         result_json: json!(result).to_string(),
-        time: (clock.read().unwrap() - starting_time) as f32,
+        time: (clock.read() - starting_time) as f32,
     }
 }

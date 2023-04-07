@@ -18,10 +18,10 @@ use crate::profilers::memory_latencies::*;
 use crate::profilers::multi_core_performance::*;
 use crate::profilers::page_size::*;
 use crate::profilers::prefetcher::*;
-use crate::profilers::Profiler;
 use crate::profilers::single_core_performance::*;
 use crate::profilers::timer_precision::*;
 use crate::profilers::tlb_size::*;
+use crate::profilers::Profiler;
 use crate::worker::{BenchmarkInput, BenchmarkResult, BenchmarkType, BenchmarkWorker};
 
 pub enum AppRootMessage {
@@ -35,7 +35,7 @@ pub enum ExperimentResult {
     NotStarted,
     Running,
     Success,
-    Error
+    Error,
 }
 
 pub struct AppRoot {
@@ -73,7 +73,7 @@ impl Component for AppRoot {
             remaining_benchmarks: VecDeque::new(),
             total_benchmarks: 0,
             finished_benchmarks: 0,
-            experiment_result: ExperimentResult::NotStarted
+            experiment_result: ExperimentResult::NotStarted,
         }
     }
 
@@ -193,7 +193,10 @@ impl AppRoot {
                 .await
                 .unwrap();
 
-            link.send_message(AppRootMessage::BenchmarksFinished(response.status(), response.status_text()));
+            link.send_message(AppRootMessage::BenchmarksFinished(
+                response.status(),
+                response.status_text(),
+            ));
         });
     }
 
@@ -238,7 +241,8 @@ fn get_user_agent() -> Option<String> {
 
 fn get_page_origin() -> String {
     let window = web_sys::window().expect("Missing window");
-    window.location()
+    window
+        .location()
         .origin()
         .expect("Missing origin information")
 }

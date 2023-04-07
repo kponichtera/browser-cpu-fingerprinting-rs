@@ -21,7 +21,7 @@ fn main() {
             .expect("posting started message succeeds");
 
         loop {
-            let _value = clock.increment().unwrap();
+            clock.increment();
             // if value % 100000 == 0 {
             //     info!("Clock value: ", value)
             // }

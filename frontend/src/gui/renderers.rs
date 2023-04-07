@@ -1,11 +1,11 @@
 use gloo_console::info;
 use web_sys::HtmlInputElement;
-use yew::{Context, Html, html};
 use yew::prelude::*;
+use yew::{html, Context, Html};
 use yew_bootstrap::component::*;
 
-use crate::gui::app_root::{AppRoot, ExperimentResult};
 use crate::gui::app_root::AppRootMessage;
+use crate::gui::app_root::{AppRoot, ExperimentResult};
 use crate::gui::components::*;
 
 pub fn render_main_container(
@@ -58,7 +58,11 @@ fn render_header() -> Html {
     }
 }
 
-pub fn render_cpu_model_instructions(model_input: String, input_disabled: bool, ctx: &Context<AppRoot>) -> Html {
+pub fn render_cpu_model_instructions(
+    model_input: String,
+    input_disabled: bool,
+    ctx: &Context<AppRoot>,
+) -> Html {
     html! {
         <>
             <h5 style="padding-left: 2rem; padding-right: 2rem; padding-top: 3rem">
@@ -251,17 +255,19 @@ fn render_next_experiment_button(experiment_result: &ExperimentResult) -> Html {
     }
 }
 
-fn render_progress_bar(experiment_result: &ExperimentResult,
-                       finished_benchmarks: usize,
-                       total_benchmarks: usize,
-                       status_label: String) -> Html {
+fn render_progress_bar(
+    experiment_result: &ExperimentResult,
+    finished_benchmarks: usize,
+    total_benchmarks: usize,
+    status_label: String,
+) -> Html {
     let progress = finished_benchmarks as f32 / total_benchmarks as f32 * 100.0;
 
     let progress_bar_classes = match experiment_result {
         ExperimentResult::Running => "progress-bar-striped progress-bar-animated",
         ExperimentResult::Success => "bg-success",
         ExperimentResult::Error => "bg-danger",
-        _ => ""
+        _ => "",
     };
 
     let progress_bar_visibility = match experiment_result {

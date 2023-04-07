@@ -1,5 +1,4 @@
 use js_sys::{Atomics, BigInt64Array, SharedArrayBuffer};
-use wasm_bindgen::JsValue;
 
 pub const CLOCK_MESSAGE_READY: &str = "clock_ready";
 pub const CLOCK_MESSAGE_STARTED: &str = "clock_started";
@@ -25,16 +24,13 @@ impl Clock {
     }
 
     #[inline(always)]
-    pub fn increment(&self) -> Result<i64, JsValue> {
-        let value = Atomics::add_bigint(&self.data, 0, 1)?;
-        Ok(value)
+    pub fn increment(&self) {
+        let _ = Atomics::add_bigint(&self.data, 0, 1);
     }
 
     #[inline(always)]
-    pub fn read(&self) -> Result<i64, JsValue> {
-        // Currently using add with zero, load_bigint seems to give a JS error.
-        let value = Atomics::add_bigint(&self.data, 0, 0)?;
-        Ok(value)
+    pub fn read(&self) -> i64 {
+        self.data.get_index(0)
     }
 }
 
