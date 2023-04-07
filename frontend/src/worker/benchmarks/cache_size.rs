@@ -20,10 +20,12 @@ struct DataPoint {
 pub fn run_cache_size_benchmark(clock: Clock) -> BenchmarkResult {
     info!("Running cache size benchmark");
     let starting_time = clock.read().unwrap();
-    let l1 = (10..150).step_by(2);
-    let l2 = (150..2000).step_by(50);
-    let l3 = (2000..25000).step_by(500);
-    let sizes = [l1, l2, l3].map(|l| l.collect::<Vec<_>>()).concat();
+    let l0 = 1..=1;
+    let l1 = (4..=512).step_by(4);
+    let l2 = (1..=1).map(|x| x * 1024);
+    let l3 = (2..=32).step_by(2).map(|x| x * 1024);
+
+    let sizes: Vec<u16> = l0.chain(l1).chain(l2).chain(l3).collect();
 
     let mut rand = rand::thread_rng();
     let result: Vec<DataPoint> = sizes
@@ -47,7 +49,6 @@ pub fn run_cache_size_benchmark(clock: Clock) -> BenchmarkResult {
                 // after we have established good data, check if these are necessary
                 p = black_box(list[p]);
             }
-
 
             p = 0;
             let start = clock.read().unwrap();
