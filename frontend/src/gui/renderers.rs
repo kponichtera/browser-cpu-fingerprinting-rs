@@ -1,4 +1,3 @@
-use gloo_console::info;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 use yew::{html, Context, Html};

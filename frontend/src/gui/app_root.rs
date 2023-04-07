@@ -1,5 +1,5 @@
 use std::collections::VecDeque;
-use std::ops::Deref;
+
 use std::rc::Rc;
 
 use gloo_net::http::Request;
@@ -11,17 +11,6 @@ use yew_bootstrap::util::*;
 use common::dto::result::ResultDTO;
 
 use crate::gui::renderers::*;
-use crate::profilers::cache_associativity::*;
-use crate::profilers::cache_size::*;
-use crate::profilers::load_buffer_size::*;
-use crate::profilers::memory_latencies::*;
-use crate::profilers::multi_core_performance::*;
-use crate::profilers::page_size::*;
-use crate::profilers::prefetcher::*;
-use crate::profilers::single_core_performance::*;
-use crate::profilers::timer_precision::*;
-use crate::profilers::tlb_size::*;
-use crate::profilers::Profiler;
 use crate::worker::{BenchmarkInput, BenchmarkResult, BenchmarkType, BenchmarkWorker};
 
 pub enum AppRootMessage {
@@ -107,7 +96,7 @@ impl Component for AppRoot {
             {render_main_container(
                 &self.model_input,
                 self.input_disabled,
-                &ctx,
+                ctx,
                 button_disabled,
                 self.finished_benchmarks,
                 self.total_benchmarks,
@@ -138,7 +127,6 @@ impl AppRoot {
     fn initialize_benchmark_data(&mut self) {
         self.benchmark_results = vec![];
         self.remaining_benchmarks = VecDeque::from(vec![
-            // TODO: Add remaining benchmarks
             BenchmarkType::PageSize,
             BenchmarkType::CacheSize,
             BenchmarkType::TlbSize,
@@ -245,35 +233,4 @@ fn get_page_origin() -> String {
         .location()
         .origin()
         .expect("Missing origin information")
-}
-
-/// TODO: For removal once benchmarks are fully handled by dedicated worker(s)
-fn run_profilers<T>(profiler_prehook: T) -> (Vec<Value>, Vec<f32>)
-where
-    T: FnOnce(&dyn Profiler) + Copy,
-{
-    let profilers: Vec<Box<dyn Profiler>> = vec![
-        Box::new(PageSizeProfiler {}),
-        Box::new(PrefetcherProfiler {}),
-        Box::new(CacheAssociativityProfiler {}),
-        Box::new(CacheSizeProfiler {}),
-        Box::new(TlbSizeProfiler {}),
-        Box::new(TimerPrecisionProfiler {}),
-        Box::new(MemoryLatenciesProfiler {}),
-        Box::new(LoadBufferSizeProfiler {}),
-        Box::new(SingleCorePerformanceProfiler {}),
-        Box::new(MultiCorePerformanceProfiler {}),
-    ];
-
-    let mut results = vec![];
-    let mut times = vec![];
-
-    for profiler in profilers {
-        profiler_prehook(profiler.deref());
-        let result = profiler.run();
-        results.push(result.0);
-        times.push(result.1);
-    }
-
-    (results, times)
 }
