@@ -25,7 +25,7 @@ pub fn run_cache_associativity_benchmark(clock: Clock) -> BenchmarkResult {
     let result = (1..MAX_SIZE)
         .into_iter()
         .map(|s| {
-            let size = STEP * s as usize;
+            let size = STEP * s;
             let mut list = vec![0; size];
             let mut indices = (0..size).step_by(STEP).collect::<Vec<_>>();
             indices.shuffle(&mut rand);

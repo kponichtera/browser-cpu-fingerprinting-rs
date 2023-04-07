@@ -1,5 +1,5 @@
 use std::collections::VecDeque;
-use std::ops::Deref;
+
 use std::rc::Rc;
 
 use gloo_net::http::Request;
@@ -96,7 +96,7 @@ impl Component for AppRoot {
             {render_main_container(
                 &self.model_input,
                 self.input_disabled,
-                &ctx,
+                ctx,
                 button_disabled,
                 self.finished_benchmarks,
                 self.total_benchmarks,

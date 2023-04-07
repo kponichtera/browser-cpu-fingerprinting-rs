@@ -24,7 +24,7 @@ pub fn run_tlb_size_benchmark(clock: Clock) -> BenchmarkResult {
     let result: Vec<DataPoint> = entries
         .into_iter()
         .map(|s| {
-            let size = PAGE_SIZE * s as usize / size_of::<usize>();
+            let size = PAGE_SIZE * s / size_of::<usize>();
             let mut list = vec![0; size];
             let mut indices = (0..s).collect::<Vec<_>>();
             indices.shuffle(&mut rand);

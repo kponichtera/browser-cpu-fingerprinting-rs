@@ -56,7 +56,7 @@ pub fn run_cache_size_benchmark(clock: Clock) -> BenchmarkResult {
                 p = black_box(list[p]);
             }
             let end = clock.read();
-            DataPoint { 
+            DataPoint {
                 x: s * 1024,
                 y: (end - start) / s as i64,
             }
