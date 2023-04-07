@@ -36,7 +36,7 @@ fn render_header() -> Html {
                 { "Browser CPU fingerprinting" }
             </h1>
             <p style="margin: 2rem">
-                { "This site will run a few JavaScript benchmarks to gather information
+                { "This site will run a few WebAssembly benchmarks to gather information
                 about your CPU. This results of these benchmarks will then be uploaded
                 to our server, where they are then stored in a database.
                 We do not collect or store any personal data. Our project is based on the research
@@ -209,9 +209,16 @@ fn render_benchmark_instructions() -> Html {
             <p style="padding-left: 2rem; padding-right: 2rem">
                 {"Please do "}
                 <strong>{"not"}</strong>
-                {" do anything else on your computer while running our benchmarks,
-                so that the benchmark results are the most accurate.
-                Press the button below to start. Once the experiment finishes successfully,
+                { " do anything else on your computer while running our benchmarks,
+                so that the results are the most accurate. " }
+                { "If you are on a mobile device please also make sure the device "}
+                <strong>{ "does not turn off" }</strong>
+                { " and is connected to a " }
+                <strong>{ "charger" }</strong>
+                { "." }
+            </p>
+            <p style="padding-left: 2rem; padding-right: 2rem">
+                {"Press the button below to start. Once the experiment finishes successfully,
                 click the button that appears to proceed to second experiment."}
             </p>
         </>
