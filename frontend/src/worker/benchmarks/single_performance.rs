@@ -16,25 +16,10 @@ pub fn run_single_performance_benchmark(clock: Clock) -> BenchmarkResult {
 
     let total_starting_time = clock.read();
 
-    let iterations = 500; // should be 500 for production; 10 for quick testing now.
+    let iterations = 500; // set 10 for quick testing
     let mut counter;
     let mut end;
     let mut data_array: Vec<DataPoint> = vec![];
-
-    /*
-    let log_delayed_info: Closure<dyn Fn()> = Closure::new(move || {
-        info!("delay 100ms");
-    });
-
-    let window = web_sys::window().expect("should have a window in this context");
-        let performance = window
-        .performance()
-        .expect("performance should be available");
-
-    window
-        .set_timeout_with_callback_and_timeout_and_arguments_0(log_delayed_info.as_ref().unchecked_ref(),1000)
-        .expect("should register `setTimeout` OK");
-    */
 
     info!("Single core: first iteration");
     for i in 0..iterations {
