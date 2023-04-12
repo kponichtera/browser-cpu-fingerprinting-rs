@@ -1,9 +1,10 @@
 import collections
 from .uarch import replace_uarch_by_base
 
+
 def prepare_l1(balance, db_models, cachesize_benchmarks_small, csv_models, csv_models_r, csv_l1):
     max_count = 30
-    counts = {16 : max_count, 24 : max_count, 32 : max_count, 48 : max_count, 64 : 0, 128 : max_count}
+    counts = {16: max_count, 24: max_count, 32: max_count, 48: max_count, 64: 0, 128: max_count}
 
     X_l1 = []
     y_l1 = []
@@ -11,18 +12,18 @@ def prepare_l1(balance, db_models, cachesize_benchmarks_small, csv_models, csv_m
     for i, db_model in enumerate(db_models):
         if db_model in csv_models:
             j = csv_models.index(db_model)
-        elif db_model in csv_models_r:     
+        elif db_model in csv_models_r:
             j = csv_models_r.index(db_model)
         else:
             continue
-        
+
         p = csv_l1[j]
         if counts[p] < 1 and balance:
             continue
         counts[p] = counts[p] - 1
 
         tmp = []
-        for d in cachesize_benchmarks_small[i][:int(len(cachesize_benchmarks_small[i])/2)]:
+        for d in cachesize_benchmarks_small[i][:int(len(cachesize_benchmarks_small[i]) / 2)]:
             tmp += [d['y']]
 
         X_l1 += [tmp]
@@ -33,14 +34,15 @@ def prepare_l1(balance, db_models, cachesize_benchmarks_small, csv_models, csv_m
 
 def prepare_l2(balance, db_models, cachesize_benchmarks, csv_models, csv_models_r, csv_l2):
     max_count = 26
-    counts = {256 : max_count, 512 : max_count, 1024 : max_count, 1280 : 0, 2048 : max_count, 3072 : 0, 4096 : 0, 6042: 0, 12288 : max_count}
+    counts = {256: max_count, 512: max_count, 1024: max_count, 1280: 0, 2048: max_count, 3072: 0, 4096: 0, 6042: 0,
+              12288: max_count}
 
     X_l2 = []
     y_l2large = []
 
     for i, db_model in enumerate(db_models):
         if db_model in csv_models:
-            if len(cachesize_benchmarks[i]) > 1:  
+            if len(cachesize_benchmarks[i]) > 1:
                 j = csv_models.index(db_model)
 
                 p = csv_l2[j]
@@ -60,14 +62,15 @@ def prepare_l2(balance, db_models, cachesize_benchmarks, csv_models, csv_models_
 
 def prepare_l3(balance, db_models, cachesize_benchmarks, csv_models, csv_models_r, csv_l3):
     max_count = 29
-    counts = {0 : max_count, 2 : 0, 3 : max_count, 4 : max_count, 6 : max_count, 8 : max_count, 9 : max_count, 12 : max_count, 15 : 0, 16 : max_count, 20 : 0, 32 : max_count}
+    counts = {0: max_count, 2: 0, 3: max_count, 4: max_count, 6: max_count, 8: max_count, 9: max_count, 12: max_count,
+              15: 0, 16: max_count, 20: 0, 32: max_count}
 
     X_l3 = []
     y_l3 = []
 
     for i, db_model in enumerate(db_models):
         if db_model in csv_models:
-            if len(cachesize_benchmarks[i]) > 1:  
+            if len(cachesize_benchmarks[i]) > 1:
                 j = csv_models.index(db_model)
 
                 p = csv_l3[j]
@@ -87,7 +90,7 @@ def prepare_l3(balance, db_models, cachesize_benchmarks, csv_models, csv_models_
 
 def prepare_l1asso(balance, db_models, cacheasso_benchmarks, csv_models, csv_models_r, csv_l1asso):
     max_count = 14
-    counts = {2 : max_count, 4 : max_count, 6 : max_count, 8 : max_count, 12 : max_count}
+    counts = {2: max_count, 4: max_count, 6: max_count, 8: max_count, 12: max_count}
 
     X_asso = []
     y_l1asso = []
@@ -95,7 +98,7 @@ def prepare_l1asso(balance, db_models, cacheasso_benchmarks, csv_models, csv_mod
     for i, db_model in enumerate(db_models):
         if db_model in csv_models:
             j = csv_models.index(db_model)
-            
+
             p = csv_l1asso[j]
             if p in counts and counts[p] < 1 and balance:
                 continue
@@ -111,10 +114,11 @@ def prepare_l1asso(balance, db_models, cacheasso_benchmarks, csv_models, csv_mod
     return X_asso, y_l1asso
 
 
-def prepare_frequency_base(balance, db_models, singleperf_benchmarks, multiperf_benchmarks, csv_models, csv_models_r, csv_base):
+def prepare_frequency_base(balance, db_models, singleperf_benchmarks, multiperf_benchmarks, csv_models, csv_models_r,
+                           csv_base):
     max_count = 125
-    counts = {0 : max_count, 1 : max_count, 2 : max_count, 3 : max_count, 4 : max_count}
-    
+    counts = {0: max_count, 1: max_count, 2: max_count, 3: max_count, 4: max_count}
+
     X_singleperf = []
     X_multiperf = []
     X_singleperf_boost = []
@@ -128,7 +132,7 @@ def prepare_frequency_base(balance, db_models, singleperf_benchmarks, multiperf_
             j = csv_models_r.index(db_model)
         else:
             continue
-        
+
         p = 0
         # [150-199, 200-249, 250-299, 300-349, 350-399]
         if csv_base[j] <= 199:
@@ -152,12 +156,12 @@ def prepare_frequency_base(balance, db_models, singleperf_benchmarks, multiperf_
             tmp += [d['y']]
         X_singleperf += [tmp[:50] + tmp[500:550] + tmp[1000:1050]]
         X_singleperf_boost += [tmp[25:75] + tmp[525:575] + tmp[1025:1075]]
-        
+
         tmp1 = []
         for core in multiperf_benchmarks[i]:
             for d in core:
                 tmp1 += [d['y']]
-        
+
         tmp2 = []
         for i in range(20):
             tmp2 += [tmp1[i * 5000]]
@@ -170,10 +174,11 @@ def prepare_frequency_base(balance, db_models, singleperf_benchmarks, multiperf_
     return X_singleperf, X_multiperf, X_combinedperf, X_singleperf_boost, y_base
 
 
-def prepare_frequency_boost(balance, db_models, singleperf_benchmarks, multiperf_benchmarks, csv_models, csv_models_r, csv_boost):
+def prepare_frequency_boost(balance, db_models, singleperf_benchmarks, multiperf_benchmarks, csv_models, csv_models_r,
+                            csv_boost):
     max_count = 34
-    counts = {0 : max_count, 1 : max_count, 2 : max_count, 3 : max_count, 4 : max_count, 5 : max_count}
-    
+    counts = {0: max_count, 1: max_count, 2: max_count, 3: max_count, 4: max_count, 5: max_count}
+
     X_singleperf = []
     X_multiperf = []
     X_singleperf_boost = []
@@ -187,7 +192,7 @@ def prepare_frequency_boost(balance, db_models, singleperf_benchmarks, multiperf
             j = csv_models_r.index(db_model)
         else:
             continue
-             
+
         # [none, 300-349, 350-399, 400-449, 450-499, 500-549]
         if csv_boost[j] <= 299:
             p = 0
@@ -212,12 +217,12 @@ def prepare_frequency_boost(balance, db_models, singleperf_benchmarks, multiperf
             tmp += [d['y']]
         X_singleperf += [tmp[:50] + tmp[500:550] + tmp[1000:1050]]
         X_singleperf_boost += [tmp[25:75] + tmp[525:575] + tmp[1025:1075]]
-        
+
         tmp1 = []
         for core in multiperf_benchmarks[i]:
             for d in core:
                 tmp1 += [d['y']]
-        
+
         tmp2 = []
         for i in range(20):
             tmp2 += [tmp1[i * 5000]]
@@ -230,10 +235,11 @@ def prepare_frequency_boost(balance, db_models, singleperf_benchmarks, multiperf
     return X_singleperf, X_multiperf, X_combinedperf, X_singleperf_boost, y_boost
 
 
-def prepare_frequency_boost_cap(balance, db_models, singleperf_benchmarks, multiperf_benchmarks, csv_models, csv_models_r, csv_base, csv_boost):
+def prepare_frequency_boost_cap(balance, db_models, singleperf_benchmarks, multiperf_benchmarks, csv_models,
+                                csv_models_r, csv_base, csv_boost):
     max_count = 19
-    counts = {0 : max_count, 1 : max_count, 2 : max_count, 3 : max_count, 4 : max_count, 5 : max_count}
-    
+    counts = {0: max_count, 1: max_count, 2: max_count, 3: max_count, 4: max_count, 5: max_count}
+
     X_singleperf = []
     X_multiperf = []
     X_singleperf_boost = []
@@ -247,7 +253,7 @@ def prepare_frequency_boost_cap(balance, db_models, singleperf_benchmarks, multi
             j = csv_models_r.index(db_model)
         else:
             continue
-        
+
         boost_diff = csv_boost[j] - csv_base[j]
         if boost_diff <= 60:
             p = 0
@@ -272,12 +278,12 @@ def prepare_frequency_boost_cap(balance, db_models, singleperf_benchmarks, multi
             tmp += [d['y']]
         X_singleperf += [tmp[:50] + tmp[500:550] + tmp[1000:1050]]
         X_singleperf_boost += [tmp[25:75] + tmp[525:575] + tmp[1025:1075]]
-        
+
         tmp1 = []
         for core in multiperf_benchmarks[i]:
             for d in core:
                 tmp1 += [d['y']]
-        
+
         tmp2 = []
         for i in range(20):
             tmp2 += [tmp1[i * 5000]]
@@ -292,7 +298,7 @@ def prepare_frequency_boost_cap(balance, db_models, singleperf_benchmarks, multi
 
 def prepare_boosttech(balance, db_models, singleperf_benchmarks, csv_models, csv_models_r, csv_base, csv_boost):
     max_count = 65
-    counts = {True : max_count, False : max_count}
+    counts = {True: max_count, False: max_count}
 
     X_boosttech = []
     y_boosttech = []
@@ -303,7 +309,7 @@ def prepare_boosttech(balance, db_models, singleperf_benchmarks, csv_models, csv
             j = csv_models.index(db_model)
         elif db_model in csv_models_r:
             j = csv_models_r.index(db_model)
-            
+
         if j != -1:
             p = csv_base[j] != csv_boost[j]
             if p in counts and counts[p] < 1 and balance:
@@ -314,30 +320,18 @@ def prepare_boosttech(balance, db_models, singleperf_benchmarks, csv_models, csv
             tmp = []
             for d in singleperf_benchmarks[i]:
                 tmp += [d['y']]
-            #X_boosttech += [tmp[:50] + tmp[500:550] + tmp[1000:1050]]
+            # X_boosttech += [tmp[:50] + tmp[500:550] + tmp[1000:1050]]
             X_boosttech += [tmp[:50]]
             y_boosttech += [p]
-    
+
     return X_boosttech, y_boosttech
 
-def prepare_uarch(balance, db_models, cachesize_benchmarks, tlb_benchmarks, cacheasso_benchmarks, csv_models, csv_models_r, csv_uarch):
+
+def prepare_uarch(balance, db_models, cachesize_benchmarks, tlb_benchmarks, cacheasso_benchmarks, csv_models,
+                  csv_models_r, csv_uarch):
     X_uarch = []
-    y_uarch = []    
+    y_uarch = []
     uarchs = []
-
-    for i, db_model in enumerate(db_models): 
-        if (db_model in csv_models or db_model in csv_models_r) and len(cachesize_benchmarks[i]) > 1:
-            try:
-                index = csv_models.index(db_model)
-            except:
-                index = csv_models_r.index(db_model)
-            
-            uarchs += [csv_uarch[index]]
-
-    counter = collections.Counter(uarchs).most_common(16) # was 10
-    counter = dict(counter)
-    counts = {k: 25 for k, v in counter.items()}
-    # counts['Firestorm and Icestorm'] = 0
 
     for i, db_model in enumerate(db_models):
         if (db_model in csv_models or db_model in csv_models_r) and len(cachesize_benchmarks[i]) > 1:
@@ -345,7 +339,20 @@ def prepare_uarch(balance, db_models, cachesize_benchmarks, tlb_benchmarks, cach
                 index = csv_models.index(db_model)
             except:
                 index = csv_models_r.index(db_model)
-            
+
+            uarchs += [csv_uarch[index]]
+
+    counter = collections.Counter(uarchs).most_common(16)  # was 10
+    counter = dict(counter)
+    counts = {k: 25 for k, v in counter.items()}
+
+    for i, db_model in enumerate(db_models):
+        if (db_model in csv_models or db_model in csv_models_r) and len(cachesize_benchmarks[i]) > 1:
+            try:
+                index = csv_models.index(db_model)
+            except:
+                index = csv_models_r.index(db_model)
+
             p = csv_uarch[index]
             if p not in counts:
                 continue
@@ -361,19 +368,21 @@ def prepare_uarch(balance, db_models, cachesize_benchmarks, tlb_benchmarks, cach
 
             for d in cachesize_benchmarks[i][3::2]:
                 tmp += [d['y']]
-            
+
             for d in cachesize_benchmarks[i]:
                 tmp += [d['y']]
 
             for d in tlb_benchmarks[i][::2]:
                 tmp += [d['y']]
-            
+
             X_uarch += [tmp]
             y_uarch += [p]
 
     return X_uarch, y_uarch
 
-def prepare_uarch_grouped(balance, db_models, cachesize_benchmarks, tlb_benchmarks, cacheasso_benchmarks, csv_models, csv_models_r, csv_uarch):
+
+def prepare_uarch_grouped(balance, db_models, cachesize_benchmarks, tlb_benchmarks, cacheasso_benchmarks, csv_models,
+                          csv_models_r, csv_uarch):
     X_uarch = []
     y_uarch = []
     csv_uarch = replace_uarch_by_base(csv_uarch)
@@ -388,10 +397,9 @@ def prepare_uarch_grouped(balance, db_models, cachesize_benchmarks, tlb_benchmar
 
             uarchs += [csv_uarch[index]]
 
-    counter = collections.Counter(uarchs).most_common(10) # was 10
+    counter = collections.Counter(uarchs).most_common(10)  # was 10
     counter = dict(counter)
     counts = {k: 22 for k, v in counter.items()}
-    # counts['Firestorm and Icestorm'] = 0
 
     for i, db_model in enumerate(db_models):
         if (db_model in csv_models or db_model in csv_models_r) and len(cachesize_benchmarks[i]) > 1:
@@ -458,15 +466,16 @@ def prepare_vendor(balance, db_models, cachesize_benchmarks, tlb_benchmarks, csv
 
     return X_vendor, y_vendor
 
+
 def prepare_vendor_all(balance, db_models, cachesize_benchmarks, tlb_benchmarks, csv_models, csv_models_r):
     max_count = 20
-    counts = {'ARM' : max_count, 'AMD' : max_count, 'Intel' : max_count}
+    counts = {'ARM': max_count, 'AMD': max_count, 'Intel': max_count}
 
     X_vendor = []
     y_vendor = []
 
     for i, db_model in enumerate(db_models):
-        if (db_model in csv_models or db_model in csv_models_r) and len(cachesize_benchmarks[i]) > 1:            
+        if (db_model in csv_models or db_model in csv_models_r) and len(cachesize_benchmarks[i]) > 1:
             p = 'Intel' if 'Intel' in db_model else 'AMD' if 'AMD' in db_model else 'ARM'
             if p in counts and counts[p] < 1 and balance:
                 continue
@@ -476,7 +485,7 @@ def prepare_vendor_all(balance, db_models, cachesize_benchmarks, tlb_benchmarks,
             tmp = []
             for d in cachesize_benchmarks[i][3::2]:
                 tmp += [d['y']]
-            
+
             for d in cachesize_benchmarks[i]:
                 tmp += [d['y']]
             for d in tlb_benchmarks[i][::2]:
@@ -488,9 +497,8 @@ def prepare_vendor_all(balance, db_models, cachesize_benchmarks, tlb_benchmarks,
     return X_vendor, y_vendor
 
 
-
-
-def prepare_model_all(balance, db_models, cachesize_benchmarks, tlb_benchmarks, cacheasso_benchmarks, execution_times, csv_models, csv_models_r):
+def prepare_model_all(balance, db_models, cachesize_benchmarks, tlb_benchmarks, cacheasso_benchmarks, execution_times,
+                      csv_models, csv_models_r):
     X_model = []
     y_model = []
 
@@ -504,7 +512,8 @@ def prepare_model_all(balance, db_models, cachesize_benchmarks, tlb_benchmarks, 
     counts = {k: 9 for k, v in counter.items()}
 
     for i, db_model in enumerate(db_models):
-        if (db_model in csv_models or db_model in csv_models_r) and len(cachesize_benchmarks[i]) > 1 and len(execution_times[i]) > 1:
+        if (db_model in csv_models or db_model in csv_models_r) and len(cachesize_benchmarks[i]) > 1 and len(
+                execution_times[i]) > 1:
             p = db_model
             if p not in counts:
                 continue
@@ -530,7 +539,9 @@ def prepare_model_all(balance, db_models, cachesize_benchmarks, tlb_benchmarks, 
 
     return X_model, y_model
 
-def prepare_model(balance, db_models, cachesize_benchmarks, tlb_benchmarks, cacheasso_benchmarks, csv_models, csv_models_r):
+
+def prepare_model(balance, db_models, cachesize_benchmarks, tlb_benchmarks, cacheasso_benchmarks, csv_models,
+                  csv_models_r):
     X_model = []
     y_model = []
 
@@ -554,20 +565,22 @@ def prepare_model(balance, db_models, cachesize_benchmarks, tlb_benchmarks, cach
 
             for d in cachesize_benchmarks[i][3::2]:
                 tmp += [d['y']]
-            
+
             for d in tlb_benchmarks[i][::2]:
                 tmp += [d['y']]
-            
+
             X_model += [tmp]
             y_model += [p]
-    
+
     return X_model, y_model
 
-def prepare_M1(balance, db_models, cachesize_benchmarks, tlb_benchmarks, cacheasso_benchmarks, csv_models, csv_models_r):
+
+def prepare_M1(balance, db_models, cachesize_benchmarks, tlb_benchmarks, cacheasso_benchmarks, csv_models,
+               csv_models_r):
     X_model = []
     y_model = []
 
-    counts = {'Apple M1' : 20, 'Other' : 20}
+    counts = {'Apple M1': 20, 'Other': 20}
 
     for i, db_model in enumerate(db_models):
         if (db_model in csv_models or db_model in csv_models_r) and len(cachesize_benchmarks[i]) > 1:
@@ -585,20 +598,21 @@ def prepare_M1(balance, db_models, cachesize_benchmarks, tlb_benchmarks, cacheas
 
             for d in cachesize_benchmarks[i][3::2]:
                 tmp += [d['y']]
-            
+
             for d in cachesize_benchmarks[i]:
                 tmp += [d['y']]
-            
+
             for d in tlb_benchmarks[i][::2]:
                 tmp += [d['y']]
-            
+
             X_model += [tmp]
             y_model += [p]
-    
+
     return X_model, y_model
 
 
-def prepare_cpuvscpu(balance, a, b, db_models, cachesize_benchmarks, tlb_benchmarks, cacheasso_benchmarks, csv_models, csv_models_r):
+def prepare_cpuvscpu(balance, a, b, db_models, cachesize_benchmarks, tlb_benchmarks, cacheasso_benchmarks, csv_models,
+                     csv_models_r):
     X_model = []
     y_model = []
 
@@ -634,11 +648,7 @@ def prepare_cpuvscpu_execution(balance, a, b, db_models, execution_times, csv_mo
     X_model = []
     y_model = []
 
-    # counter = collections.Counter(db_models).most_common(13)
-    # counter = dict(counter)
-    # counts = {k: 9 for k, v in counter.items()}
-
-    counts = {a : 20, b : 20}
+    counts = {a: 20, b: 20}
 
     for i, db_model in enumerate(db_models):
         if (db_model == a or db_model == b) and len(execution_times[i]) > 1:
@@ -652,7 +662,7 @@ def prepare_cpuvscpu_execution(balance, a, b, db_models, execution_times, csv_mo
 
             X_model += [execution_times[i]]
             y_model += [p]
-    
+
     return X_model, y_model
 
 
@@ -660,11 +670,7 @@ def prepare_singleintel(balance, db_models, execution_times, csv_models, csv_mod
     X_model = []
     y_model = []
 
-    # counter = collections.Counter(db_models).most_common(13)
-    # counter = dict(counter)
-    # counts = {k: 9 for k, v in counter.items()}
-
-    counts = {'Intel(R) Core(TM) i5-8250U' : 20, 'Other' : 20}
+    counts = {'Intel(R) Core(TM) i5-8250U': 20, 'Other': 20}
 
     for i, db_model in enumerate(db_models):
         if (db_model in csv_models or db_model in csv_models_r) and execution_times[i] != []:
@@ -675,24 +681,24 @@ def prepare_singleintel(balance, db_models, execution_times, csv_models, csv_mod
                 continue
             if p in counts:
                 counts[p] = counts[p] - 1
-            
+
             X_model += [execution_times[i]]
             y_model += [p]
-    
+
     return X_model, y_model
 
 
 def prepare_othermodel(balance, db_models, singleperf_benchmarks, csv_models, csv_models_r):
     counter = collections.Counter(db_models).most_common(19)
     counter = dict(counter)
-    
+
     X_othermodel = []
     y_othermodel = []
 
     counts = {k: 7 for k, v in counter.items()}
 
     for i, db_model in enumerate(db_models):
-        if (db_model in csv_models or db_model in csv_models_r):            
+        if (db_model in csv_models or db_model in csv_models_r):
             p = db_model
             if p not in counts:
                 continue
@@ -702,9 +708,6 @@ def prepare_othermodel(balance, db_models, singleperf_benchmarks, csv_models, cs
                 counts[p] = counts[p] - 1
 
             tmp = []
-            # for d in singleperf_benchmarks[i]:
-            #     tmp += [d['y']]
-            # tmp = tmp[:25] + tmp[500:525] + tmp[1000:1025]
 
             X_othermodel += [tmp]
             y_othermodel += [p]
@@ -718,7 +721,8 @@ def prepare_model_execution(balance, db_models, execution_times, cachesize_bench
 
     p_models = []
     for i, db_model in enumerate(db_models):
-        if (db_model in csv_models or db_model in csv_models_r) and execution_times[i] != [] and len(cachesize_benchmarks_large[i]) > 1:
+        if (db_model in csv_models or db_model in csv_models_r) and execution_times[i] != [] and len(
+                cachesize_benchmarks_large[i]) > 1:
             p_models += [db_model]
 
     counter = collections.Counter(p_models).most_common(14)
@@ -726,7 +730,8 @@ def prepare_model_execution(balance, db_models, execution_times, cachesize_bench
     counts = {k: 9 for k, v in counter.items()}
 
     for i, db_model in enumerate(db_models):
-        if (db_model in csv_models or db_model in csv_models_r) and execution_times[i] != [] and len(cachesize_benchmarks_large[i]) > 1:
+        if (db_model in csv_models or db_model in csv_models_r) and execution_times[i] != [] and len(
+                cachesize_benchmarks_large[i]) > 1:
             p = db_model
             if p not in counts:
                 continue
@@ -792,9 +797,11 @@ def prepare_tlb(balance, db_models, tlb_benchmarks, csv_models, csv_models_r, cs
 
     return X_tlb, y_tlb
 
+
 def prepare_threads(balance, db_models, csv_models, csv_models_r, csv_threads):
     max_count = 40
-    counts = {2: max_count, 4: max_count, 6: max_count, 8: max_count, 12: max_count, 16: max_count, 20: max_count, 24: 0}
+    counts = {2: max_count, 4: max_count, 6: max_count, 8: max_count, 12: max_count, 16: max_count, 20: max_count,
+              24: 0}
 
     X_threads = []
     y_threads = []
@@ -823,7 +830,7 @@ def prepare_threads(balance, db_models, csv_models, csv_models_r, csv_threads):
 
 def prepare_htt(balance, db_models, csv_models, csv_models_r, csv_smt):
     max_count = 139
-    counts = {False : max_count, True : max_count}
+    counts = {False: max_count, True: max_count}
 
     X_htt = []
     y_htt = []
@@ -849,7 +856,7 @@ def prepare_htt(balance, db_models, csv_models, csv_models_r, csv_smt):
 
 def prepare_smt(balance, db_models, csv_models, csv_models_r, csv_smt):
     max_count = 210
-    counts = {False : max_count, True : max_count}
+    counts = {False: max_count, True: max_count}
 
     X_smt = []
     y_smt = []

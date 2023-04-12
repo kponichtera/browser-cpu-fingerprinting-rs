@@ -6,7 +6,7 @@ def replace_uarch_by_base(uarchs):
     uarchs = list(map(lambda x: "Skylake" if x == "Whiskey Lake" else x, uarchs))
 
     # Haswell
-    uarchs = list(map(lambda x: "Haswell" if x == "Broadwell" else x, uarchs))   
+    uarchs = list(map(lambda x: "Haswell" if x == "Broadwell" else x, uarchs))
 
     # Sandy Bridge
     uarchs = list(map(lambda x: "Sandy Bridge" if x == "Ivy Bridge" else x, uarchs))
