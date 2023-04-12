@@ -373,19 +373,19 @@ def prepare_uarch(balance, db_models, cachesize_benchmarks, tlb_benchmarks, cach
 
     return X_uarch, y_uarch
 
-def prepare_uarch_grouped(balance, db_models, cachesize_benchmarks, tlb_benchmarks, cacheasso_benchmarks, cores, csv_models, csv_models_r, csv_uarch):
+def prepare_uarch_grouped(balance, db_models, cachesize_benchmarks, tlb_benchmarks, cacheasso_benchmarks, csv_models, csv_models_r, csv_uarch):
     X_uarch = []
     y_uarch = []
     csv_uarch = replace_uarch_by_base(csv_uarch)
     uarchs = []
 
-    for i, db_model in enumerate(db_models): 
+    for i, db_model in enumerate(db_models):
         if (db_model in csv_models or db_model in csv_models_r) and len(cachesize_benchmarks[i]) > 1:
             try:
                 index = csv_models.index(db_model)
             except:
                 index = csv_models_r.index(db_model)
-            
+
             uarchs += [csv_uarch[index]]
 
     counter = collections.Counter(uarchs).most_common(10) # was 10
@@ -399,7 +399,7 @@ def prepare_uarch_grouped(balance, db_models, cachesize_benchmarks, tlb_benchmar
                 index = csv_models.index(db_model)
             except:
                 index = csv_models_r.index(db_model)
-            
+
             p = csv_uarch[index]
             if p not in counts:
                 continue
@@ -415,16 +415,13 @@ def prepare_uarch_grouped(balance, db_models, cachesize_benchmarks, tlb_benchmar
 
             for d in cachesize_benchmarks[i][3::2]:
                 tmp += [d['y']]
-            
+
             for d in cachesize_benchmarks[i]:
                 tmp += [d['y']]
 
             for d in tlb_benchmarks[i][::2]:
                 tmp += [d['y']]
 
-            for d in cores[i][:17]:
-                tmp += [d['y']]
-            
             X_uarch += [tmp]
             y_uarch += [p]
 
@@ -685,7 +682,7 @@ def prepare_singleintel(balance, db_models, execution_times, csv_models, csv_mod
     return X_model, y_model
 
 
-def prepare_othermodel(balance, db_models, singleperf_benchmarks, cores, csv_models, csv_models_r):
+def prepare_othermodel(balance, db_models, singleperf_benchmarks, csv_models, csv_models_r):
     counter = collections.Counter(db_models).most_common(19)
     counter = dict(counter)
     
@@ -708,8 +705,6 @@ def prepare_othermodel(balance, db_models, singleperf_benchmarks, cores, csv_mod
             # for d in singleperf_benchmarks[i]:
             #     tmp += [d['y']]
             # tmp = tmp[:25] + tmp[500:525] + tmp[1000:1025]
-            for d in cores[i][:17]:
-                tmp += [d['y']]
 
             X_othermodel += [tmp]
             y_othermodel += [p]
@@ -797,10 +792,9 @@ def prepare_tlb(balance, db_models, tlb_benchmarks, csv_models, csv_models_r, cs
 
     return X_tlb, y_tlb
 
-
-def prepare_threads(balance, db_models, cores, csv_models, csv_models_r, csv_threads):
+def prepare_threads(balance, db_models, csv_models, csv_models_r, csv_threads):
     max_count = 40
-    counts = {2 : max_count, 4 : max_count, 6 : max_count, 8 : max_count, 12 : max_count, 16 : max_count, 20 : max_count, 24 : 0}
+    counts = {2: max_count, 4: max_count, 6: max_count, 8: max_count, 12: max_count, 16: max_count, 20: max_count, 24: 0}
 
     X_threads = []
     y_threads = []
@@ -819,8 +813,8 @@ def prepare_threads(balance, db_models, cores, csv_models, csv_models_r, csv_thr
                 counts[p] = counts[p] - 1
 
             tmp = []
-            for d in cores[i][:17]:
-                tmp += [d['y']]
+            for d in range(17):
+                tmp += [db_models[i]['y'][d]]
             X_threads += [tmp]
             y_threads += [p]
 
