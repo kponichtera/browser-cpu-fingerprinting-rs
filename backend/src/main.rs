@@ -41,6 +41,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 fn configure_server(cfg: &mut web::ServiceConfig) {
     // Increase the size limit of the payload to 100 MB
     let json_cfg = web::JsonConfig::default().limit(100 * 1024 * 1024);
+    let payload_cfg = web::PayloadConfig::default().limit(100 * 1024 * 1024);
 
-    cfg.app_data(json_cfg);
+    cfg.app_data(json_cfg).app_data(payload_cfg);
 }

@@ -20,12 +20,12 @@ struct DataPoint {
 
 pub fn run_cache_associativity_benchmark(clock: Clock) -> BenchmarkResult {
     info!("Running cache associativity benchmark");
-    let starting_time = clock.read().unwrap();
+    let starting_time = clock.read();
     let mut rand = rand::thread_rng();
     let result = (1..MAX_SIZE)
         .into_iter()
         .map(|s| {
-            let size = STEP * s as usize;
+            let size = STEP * s;
             let mut list = vec![0; size];
             let mut indices = (0..size).step_by(STEP).collect::<Vec<_>>();
             indices.shuffle(&mut rand);
@@ -33,11 +33,11 @@ pub fn run_cache_associativity_benchmark(clock: Clock) -> BenchmarkResult {
             list[indices[s - 1]] = indices[0];
 
             let mut p = 0;
-            let start = clock.read().unwrap();
+            let start = clock.read();
             for _ in 0..(s * ITERATIONS) {
                 p = black_box(list[p]);
             }
-            let end = clock.read().unwrap();
+            let end = clock.read();
             DataPoint {
                 x: s as u16,
                 y: (end - start) / s as i64,
@@ -48,6 +48,6 @@ pub fn run_cache_associativity_benchmark(clock: Clock) -> BenchmarkResult {
     BenchmarkResult {
         benchmark: BenchmarkType::CacheAssociativity,
         result_json: json!(result).to_string(),
-        time: (clock.read().unwrap() - starting_time) as f32,
+        time: (clock.read() - starting_time) as f32,
     }
 }

@@ -1,11 +1,10 @@
-use gloo_console::info;
 use web_sys::HtmlInputElement;
-use yew::{Context, Html, html};
 use yew::prelude::*;
+use yew::{html, Context, Html};
 use yew_bootstrap::component::*;
 
-use crate::gui::app_root::{AppRoot, ExperimentResult};
 use crate::gui::app_root::AppRootMessage;
+use crate::gui::app_root::{AppRoot, ExperimentResult};
 use crate::gui::components::*;
 
 pub fn render_main_container(
@@ -37,7 +36,7 @@ fn render_header() -> Html {
                 { "Browser CPU fingerprinting" }
             </h1>
             <p style="margin: 2rem">
-                { "This site will run a few JavaScript benchmarks to gather information
+                { "This site will run a few WebAssembly benchmarks to gather information
                 about your CPU. This results of these benchmarks will then be uploaded
                 to our server, where they are then stored in a database.
                 We do not collect or store any personal data. Our project is based on the research
@@ -58,7 +57,11 @@ fn render_header() -> Html {
     }
 }
 
-pub fn render_cpu_model_instructions(model_input: String, input_disabled: bool, ctx: &Context<AppRoot>) -> Html {
+pub fn render_cpu_model_instructions(
+    model_input: String,
+    input_disabled: bool,
+    ctx: &Context<AppRoot>,
+) -> Html {
     html! {
         <>
             <h5 style="padding-left: 2rem; padding-right: 2rem; padding-top: 3rem">
@@ -99,13 +102,13 @@ pub fn render_cpu_model_instructions(model_input: String, input_disabled: bool, 
                                 <code>
                                     <p>{ "Name" }</p>
                                     <p style="margin-top: -1rem">
-                                        { "Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz" }
+                                        { "Intel(R) Core(TM) i3-10900K CPU @ 3.10GHz" }
                                     </p>
                                 </code>
                                 </li>
                             <li>
                                 { "Your CPU model is the second line of the output. In this case: " }
-                                <code>{ "Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz" }</code>
+                                <code>{ "Intel(R) Core(TM) i3-10900K CPU @ 3.10GHz" }</code>
                             </li>
                         </ol>
                     </AccordionCollapse>
@@ -125,12 +128,12 @@ pub fn render_cpu_model_instructions(model_input: String, input_disabled: bool, 
                                 {"."}
                                 {" The output should look something like this:"}
                                 <code>
-                                    <p>{"model name: Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz"}</p>
+                                    <p>{"model name: Intel(R) Core(TM) i3-10900K CPU @ 3.10GHz"}</p>
                                 </code>
                             </li>
                             <li>
                                 {"Your CPU model is the second part of the output. In this case: "}
-                                <code>{" Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz "}</code>
+                                <code>{" Intel(R) Core(TM) i3-10900K CPU @ 3.10GHz "}</code>
                             </li>
                         </ol>
                     </AccordionCollapse>
@@ -151,13 +154,13 @@ pub fn render_cpu_model_instructions(model_input: String, input_disabled: bool, 
                                 {" The output should look something like this:"}
                                 <code>
                                     <p>
-                                        {"machdep.cpu.brand_string: Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz"}
+                                        {"machdep.cpu.brand_string: Intel(R) Core(TM) i3-10900K CPU @ 3.10GHz"}
                                     </p>
                                 </code>
                             </li>
                             <li>
                                 {"Your CPU model is the second part of the output. In this case: "}
-                                <code>{" Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz "}</code>
+                                <code>{" Intel(R) Core(TM) i3-10900K CPU @ 3.10GHz "}</code>
                             </li>
                         </ol>
                     </AccordionCollapse>
@@ -206,9 +209,16 @@ fn render_benchmark_instructions() -> Html {
             <p style="padding-left: 2rem; padding-right: 2rem">
                 {"Please do "}
                 <strong>{"not"}</strong>
-                {" do anything else on your computer while running our benchmarks,
-                so that the benchmark results are the most accurate.
-                Press the button below to start. Once the experiment finishes successfully,
+                { " do anything else on your computer while running our benchmarks,
+                so that the results are the most accurate. " }
+                { "If you are on a mobile device please also make sure the device "}
+                <strong>{ "does not turn off" }</strong>
+                { " and is connected to a " }
+                <strong>{ "charger" }</strong>
+                { "." }
+            </p>
+            <p style="padding-left: 2rem; padding-right: 2rem">
+                {"Press the button below to start. Once the experiment finishes successfully,
                 click the button that appears to proceed to second experiment."}
             </p>
         </>
@@ -251,17 +261,19 @@ fn render_next_experiment_button(experiment_result: &ExperimentResult) -> Html {
     }
 }
 
-fn render_progress_bar(experiment_result: &ExperimentResult,
-                       finished_benchmarks: usize,
-                       total_benchmarks: usize,
-                       status_label: String) -> Html {
+fn render_progress_bar(
+    experiment_result: &ExperimentResult,
+    finished_benchmarks: usize,
+    total_benchmarks: usize,
+    status_label: String,
+) -> Html {
     let progress = finished_benchmarks as f32 / total_benchmarks as f32 * 100.0;
 
     let progress_bar_classes = match experiment_result {
         ExperimentResult::Running => "progress-bar-striped progress-bar-animated",
         ExperimentResult::Success => "bg-success",
         ExperimentResult::Error => "bg-danger",
-        _ => ""
+        _ => "",
     };
 
     let progress_bar_visibility = match experiment_result {

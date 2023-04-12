@@ -31,7 +31,7 @@ pub fn start_clock_worker<F: Fn(Clock, Worker) + 'static>(
     // and send the shared array buffer to it
     let shared_buffer_clone = clock.shared_buffer.clone();
     let worker_clone = worker.clone();
-    let clock_clone = clock.clone();
+    let clock_clone = clock;
     let onmessage = Closure::wrap(Box::new(move |msg: MessageEvent| {
         let clock_clone = clock_clone.clone();
         let worker_clone = worker_clone.clone();
@@ -44,7 +44,7 @@ pub fn start_clock_worker<F: Fn(Clock, Worker) + 'static>(
             }
             CLOCK_MESSAGE_READY => {
                 let shared_buffer_clone = shared_buffer_clone.clone();
-                let worker_clone = worker_clone.clone();
+                let worker_clone = worker_clone;
                 info!("Sending buffer to the clock worker");
                 worker_clone
                     .post_message(&JsValue::from(shared_buffer_clone))
