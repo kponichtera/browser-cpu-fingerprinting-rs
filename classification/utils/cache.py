@@ -62,6 +62,7 @@ def model_filter(db_models):
     db_models = list(map(lambda x: 'Intel(R) Core(TM) i7-7700HQ' if x == 'Intel i7-7700HQ' else x, db_models))
     db_models = list(map(lambda x: x.split(' @')[0], db_models))
     db_models = list(map(lambda x: x.split('11th Gen ')[1] if len(x.split('11th Gen ')) > 1 else x, db_models))
+    db_models = list(map(lambda x: x.split('12th Gen ')[1] if len(x.split('12th Gen ')) > 1 else x, db_models))
     db_models = list(map(lambda x: x.split(' with')[0], db_models))
     db_models = list(map(lambda x: x.split(' Quad-Core')[0], db_models))
     db_models = list(map(lambda x: x.split(' Six-Core')[0], db_models))
@@ -143,11 +144,12 @@ def model_filter(db_models):
     db_models = list(map(lambda x: 'Intel(R) Core(TM) i7-7700HQ' if x == 'Intel(R) Core(I) I7-7700HQ' else x, db_models))
     db_models = list(map(lambda x: 'Intel(R) Pentium(R) CPU N3710' if x == 'intel pentium N3710' else x, db_models))
     db_models = list(map(lambda x: 'AMD Athlon(TM) Silver 3050U' if x == 'AMD athlon silver 3050U' else x, db_models))
+    
     return db_models
 
 
 def load_database():
-    cache_path = Path(".cache")
+    cache_path = Path("../.cache")
     if cache_path.exists():
         with open(cache_path / "benchmarks.pkl", 'rb') as f:
             benchmarks = pickle.load(f)
@@ -155,11 +157,9 @@ def load_database():
             db_models = pickle.load(f)
         return db_models, benchmarks
 
-    print('[-]  Loading from sqlite3 database')
     eliminated = 0
     start_time = time.time()
-    con = sqlite3.connect('/path/to/db.sqlite3')
-
+    
     db_models = []
     # pagesize_benchmarks = []
     # prefetcher_benchmarks = []
@@ -175,50 +175,63 @@ def load_database():
     # multiperf_benchmarks = []
     cores = []
     execution_times = []
+    
+    # we do not have an sqlite3 database
+    if False:
+        print('[-]  Loading from sqlite3 database')
+        con = sqlite3.connect('/path/to/db.sqlite3')
 
-    cursor = con.execute("SELECT * FROM upload_benchmarkresult;")
-    for row in cursor.fetchall():
-        # exclude my own CPU from the dataset
-        if row[1] == 'Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz':
-            eliminated += 1
-            continue
-        db_models += [row[1]]
-        # during the first iteration we did not collect execution times
-        execution_times += [[]]
-        benchmarks = json.loads(row[3])
-        # pagesize_benchmarks += [benchmarks[0]]
-        # prefetcher_benchmarks += [benchmarks[1]]
-        cacheasso_benchmarks += [benchmarks[2]]
-        cachesize_benchmarks_small += [benchmarks[3]]
-        cachesize_benchmarks_large += [benchmarks[4]]
-        tlb_benchmarks += [benchmarks[5]]
-        # timer_time += [benchmarks[6]]
-        timer_diff += [benchmarks[7][:4]]
-        # memory_latencies += [benchmarks[8]]
-        # loadbuffer_benchmarks += [benchmarks[9]]
-        singleperf_benchmarks += [benchmarks[10]]
-        # multiperf_benchmarks += [benchmarks[11]]
-        cores += [benchmarks[12]]
+        cursor = con.execute("SELECT * FROM upload_benchmarkresult;")
+        for row in cursor.fetchall():
+            # exclude my own CPU from the dataset
+            if row[1] == 'Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz':
+                eliminated += 1
+                continue
+            db_models += [row[1]]
+            # during the first iteration we did not collect execution times
+            execution_times += [[]]
+            benchmarks = json.loads(row[3])
+            # pagesize_benchmarks += [benchmarks[0]]
+            # prefetcher_benchmarks += [benchmarks[1]]            
+            cacheasso_benchmarks += [benchmarks[3]]
+            cachesize_benchmarks_small += [benchmarks[1]]
+            # cachesize_benchmarks_large += [benchmarks[4]]
+            tlb_benchmarks += [benchmarks[2]]
+            # timer_time += [benchmarks[6]]
+            timer_diff += [benchmarks[7][:4]]
+            # memory_latencies += [benchmarks[8]]
+            # loadbuffer_benchmarks += [benchmarks[9]]
+            singleperf_benchmarks += [benchmarks[10]]
+            # multiperf_benchmarks += [benchmarks[11]]
+            cores += [benchmarks[12]]
 
     print('[-]  Loading from PostgreSQL database')
-    dump = pgdumplib.load('/path/to/db.dump')
+    dump = pgdumplib.load('new_backend.pgdump')
     for row in dump.table_data('public', 'upload_benchmarkresult'):
         db_models += [row[1]]
+        
         execution_times += [json.loads(row[5])]
         benchmarks = json.loads(row[3])
+        
+         #   0: "PageSize"
+         #   1: "CacheSize"
+         #   2: "TlbSize"
+         #   3: "CacheAssociativity"
+         #   4: "SinglePerformance
+        
         # pagesize_benchmarks += [benchmarks[0]]
         # prefetcher_benchmarks += [benchmarks[1]]
-        cacheasso_benchmarks += [benchmarks[2]]
-        cachesize_benchmarks_small += [benchmarks[3]]
-        cachesize_benchmarks_large += [benchmarks[4]]
-        tlb_benchmarks += [benchmarks[5]]
+        cacheasso_benchmarks += [benchmarks[3]]
+        cachesize_benchmarks_small += [benchmarks[1]]
+        # cachesize_benchmarks_large += [benchmarks[4]]
+        tlb_benchmarks += [benchmarks[2]]
         # timer_time += [benchmarks[6]]
-        timer_diff += [benchmarks[7][:4]]
+        # timer_diff += [benchmarks[7][:4]]
         # memory_latencies += [benchmarks[8]]
         # loadbuffer_benchmarks += [benchmarks[9]]
-        singleperf_benchmarks += [benchmarks[10]]
+        singleperf_benchmarks += [benchmarks[4]]
         # multiperf_benchmarks += [benchmarks[11]]
-        cores += [benchmarks[12]]
+        # cores += [benchmarks[12]]
 
     benchmarks = dict()
     benchmarks['cacheasso_benchmarks'] = cacheasso_benchmarks
@@ -268,7 +281,7 @@ def load_csv():
         'tlb': []
     }
 
-    with open('../data/cpus.csv') as csv_file:
+    with open('cpus.csv') as csv_file:
         csv_reader = csv.DictReader(csv_file, delimiter=';')
         for row in csv_reader:
             res['name'] += [row['name']]
