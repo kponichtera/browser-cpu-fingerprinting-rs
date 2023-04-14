@@ -20,7 +20,7 @@
 
 ## Running frontend locally
 
-1. Build and run frontend with `task frontend:run`.
+1. Build and run frontend with `task frontend:run_release`.
    It will be served on http://localhost:9000.
    Page will automatically refresh when there are changes in the code.
 
